@@ -1,0 +1,11 @@
+.vscode/**
+.vscode-test/**
+src/**
+node_modules/**
+.gitignore
+vitest.config.ts
+esbuild.js
+tsconfig.json
+test-fixtures/**
+generate-icon.js
+.claude/**

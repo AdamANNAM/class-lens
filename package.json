@@ -1,0 +1,147 @@
+{
+  "name": "class-lens",
+  "displayName": "Class Lens — className & CSS Class Annotations",
+  "description": "See className and CSS class values as inline annotations next to closing tags in JSX, TSX, HTML, Vue, Svelte, Astro, and more",
+  "version": "0.1.0",
+  "publisher": "adamholmes",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AdamANNAM/class-lens"
+  },
+  "icon": "icon.png",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Visualization"
+  ],
+  "keywords": [
+    "className",
+    "CSS",
+    "class",
+    "closing tag",
+    "React",
+    "JSX",
+    "Tailwind",
+    "annotation",
+    "inlay hint",
+    "preview"
+  ],
+  "galleryBanner": {
+    "color": "#1e1e2e",
+    "theme": "dark"
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "Class Lens",
+      "properties": {
+        "classnamePreview.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable/disable className preview annotations"
+        },
+        "classnamePreview.renderMode": {
+          "type": "string",
+          "default": "decoration",
+          "enum": [
+            "decoration",
+            "inlayHint"
+          ],
+          "enumDescriptions": [
+            "Text decorations appended after closing tags",
+            "Native VS Code inlay hints"
+          ],
+          "description": "Rendering mode for className previews"
+        },
+        "classnamePreview.maxLength": {
+          "type": "number",
+          "default": 0,
+          "description": "Maximum characters to display (0 = no truncation)"
+        },
+        "classnamePreview.truncateType": {
+          "type": "string",
+          "default": "character",
+          "enum": [
+            "character",
+            "word"
+          ],
+          "enumDescriptions": [
+            "Truncate at exact character count",
+            "Truncate at word boundary (split on spaces)"
+          ],
+          "description": "Truncate at exact character count or at word boundary"
+        },
+        "classnamePreview.truncatePosition": {
+          "type": "string",
+          "default": "end",
+          "enum": [
+            "end",
+            "start"
+          ],
+          "enumDescriptions": [
+            "Keep the start of the value, truncate the end",
+            "Keep the end of the value, truncate the start"
+          ],
+          "description": "Truncate from the end (keep start) or from the start (keep end)"
+        },
+        "classnamePreview.fontStyle": {
+          "type": "string",
+          "default": "italic",
+          "enum": [
+            "italic",
+            "normal"
+          ],
+          "description": "Font style for annotations"
+        },
+        "classnamePreview.opacity": {
+          "type": "string",
+          "default": "0.6",
+          "description": "CSS opacity for annotations"
+        },
+        "classnamePreview.prefix": {
+          "type": "string",
+          "default": "// ",
+          "description": "Prefix before the class value (e.g. '// ' to look like a comment)"
+        },
+        "classnamePreview.excludedLanguages": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "description": "Language IDs where the extension should NOT show annotations"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "npm run check-types && node esbuild.js",
+    "check-types": "tsc --noEmit",
+    "watch": "node esbuild.js --watch",
+    "package": "npm run check-types && node esbuild.js --production",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "pretest": "npm run compile",
+    "test": "vscode-test",
+    "lint": "eslint src",
+    "vsix": "npm run package && vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/test-cli": "^0.0.4",
+    "@vscode/test-electron": "^2.3.8",
+    "@vscode/vsce": "^3.7.1",
+    "esbuild": "^0.19.11",
+    "mocha": "^10.2.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0"
+  }
+}
