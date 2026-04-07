@@ -115,13 +115,40 @@
             "type": "string"
           },
           "description": "Language IDs where the extension should NOT show annotations"
+        },
+        "classnamePreview.transformPatterns": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "object",
+            "properties": {
+              "pattern": {
+                "type": "string",
+                "description": "Regex pattern string"
+              },
+              "replacement": {
+                "type": "string",
+                "default": "",
+                "description": "Replacement string (supports $1, $2, etc.)"
+              },
+              "flags": {
+                "type": "string",
+                "default": "g",
+                "description": "Regex flags (default: \"g\")"
+              }
+            },
+            "required": [
+              "pattern"
+            ]
+          },
+          "markdownDescription": "Array of regex transform patterns applied to hint values before display. Each entry has `pattern` (regex string), `replacement` (default `\"\"`), and `flags` (default `\"g\"`). Transforms run in order.\n\nExample to strip `styles.` prefix and unwrap `classNames()`:\n```json\n[\n  { \"pattern\": \"styles\\\\.\", \"replacement\": \"\", \"flags\": \"g\" },\n  { \"pattern\": \"^classNames\\\\((.*)\\\\)$\", \"replacement\": \"$1\", \"flags\": \"s\" }\n]\n```"
         }
       }
     }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
-    "compile": "npm run check-types && node esbuild.js",
+    "compile": "npm run check-types && node esbuild.js && tsc -p src/test/tsconfig.json",
     "check-types": "tsc --noEmit",
     "watch": "node esbuild.js --watch",
     "package": "npm run check-types && node esbuild.js --production",
@@ -133,6 +160,7 @@
     "vsix": "npm run package && vsce package --no-dependencies"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/mocha": "^10.0.6",
     "@types/node": "^20.11.0",
     "@types/vscode": "^1.85.0",
@@ -140,8 +168,10 @@
     "@vscode/test-electron": "^2.3.8",
     "@vscode/vsce": "^3.7.1",
     "esbuild": "^0.19.11",
+    "eslint": "^10.2.0",
     "mocha": "^10.2.0",
     "typescript": "^5.3.3",
+    "typescript-eslint": "^8.58.0",
     "vitest": "^1.2.0"
   }
 }
