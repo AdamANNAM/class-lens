@@ -19,6 +19,7 @@ describe('configuration', () => {
       expect(config.opacity).toBe('0.6');
       expect(config.prefix).toBe('// ');
       expect(config.excludedLanguages).toEqual([]);
+      expect(config.transformPatterns).toEqual([]);
     });
 
     it('returns overridden values from workspace config', () => {
@@ -90,6 +91,50 @@ describe('configuration', () => {
 
     it('returns true for empty string languageId (not excluded)', () => {
       expect(isLanguageSupported('')).toBe(true);
+    });
+  });
+
+  describe('transformPatterns', () => {
+    it('returns transformPatterns from config', () => {
+      _setMockConfig('classnamePreview', {
+        transformPatterns: [
+          { pattern: 'styles\\.', replacement: '', flags: 'g' },
+        ],
+      });
+      const config = getConfig();
+      expect(config.transformPatterns).toEqual([
+        { pattern: 'styles\\.', replacement: '', flags: 'g' },
+      ]);
+    });
+
+    it('normalizes missing replacement to empty string', () => {
+      _setMockConfig('classnamePreview', {
+        transformPatterns: [{ pattern: 'foo' }],
+      });
+      const config = getConfig();
+      expect(config.transformPatterns[0].replacement).toBe('');
+      expect(config.transformPatterns[0].flags).toBe('g');
+    });
+
+    it('normalizes missing flags to "g"', () => {
+      _setMockConfig('classnamePreview', {
+        transformPatterns: [{ pattern: 'foo', replacement: 'bar' }],
+      });
+      const config = getConfig();
+      expect(config.transformPatterns[0].flags).toBe('g');
+    });
+
+    it('preserves explicitly set flags', () => {
+      _setMockConfig('classnamePreview', {
+        transformPatterns: [{ pattern: 'foo', replacement: 'bar', flags: 'si' }],
+      });
+      const config = getConfig();
+      expect(config.transformPatterns[0].flags).toBe('si');
+    });
+
+    it('returns empty array when not configured', () => {
+      const config = getConfig();
+      expect(config.transformPatterns).toEqual([]);
     });
   });
 });

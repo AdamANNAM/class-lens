@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
-import { HintData, ClassNamePreviewConfig } from './types.js';
+import type { HintData, ClassNamePreviewConfig } from './types.js';
 
 let decorationType: vscode.TextEditorDecorationType | undefined;
 
-export function createDecorationType(config: ClassNamePreviewConfig): vscode.TextEditorDecorationType {
+export const createDecorationType = (config: ClassNamePreviewConfig) => {
   if (decorationType) {
     decorationType.dispose();
   }
@@ -18,14 +18,13 @@ export function createDecorationType(config: ClassNamePreviewConfig): vscode.Tex
   });
 
   return decorationType;
-}
+};
 
-export function buildDecorations(
+export const buildDecorations = (
   hints: HintData[],
-  document: vscode.TextDocument,
   config: ClassNamePreviewConfig
-): vscode.DecorationOptions[] {
-  return hints.map((hint) => {
+): vscode.DecorationOptions[] =>
+  hints.map((hint) => {
     const pos = new vscode.Position(hint.closingTagEnd.line, hint.closingTagEnd.character + 1);
     const range = new vscode.Range(pos, pos);
 
@@ -40,25 +39,27 @@ export function buildDecorations(
       },
     };
   });
-}
 
-export function applyDecorations(
+export const applyDecorations = (
   editor: vscode.TextEditor,
   hints: HintData[],
   config: ClassNamePreviewConfig,
   type: vscode.TextEditorDecorationType
-): void {
-  const decorations = buildDecorations(hints, editor.document, config);
+) => {
+  const decorations = buildDecorations(hints, config);
   editor.setDecorations(type, decorations);
-}
+};
 
-export function clearDecorations(editor: vscode.TextEditor, type: vscode.TextEditorDecorationType): void {
+export const clearDecorations = (
+  editor: vscode.TextEditor,
+  type: vscode.TextEditorDecorationType
+) => {
   editor.setDecorations(type, []);
-}
+};
 
-export function disposeDecorationType(): void {
+export const disposeDecorationType = () => {
   if (decorationType) {
     decorationType.dispose();
     decorationType = undefined;
   }
-}
+};

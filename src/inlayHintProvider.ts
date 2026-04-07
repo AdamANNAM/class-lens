@@ -6,7 +6,7 @@ export class ClassNameInlayHintsProvider implements vscode.InlayHintsProvider {
   private _onDidChangeInlayHints = new vscode.EventEmitter<void>();
   readonly onDidChangeInlayHints = this._onDidChangeInlayHints.event;
 
-  refresh(): void {
+  refresh() {
     this._onDidChangeInlayHints.fire();
   }
 
@@ -14,7 +14,7 @@ export class ClassNameInlayHintsProvider implements vscode.InlayHintsProvider {
     document: vscode.TextDocument,
     range: vscode.Range,
     _token: vscode.CancellationToken
-  ): vscode.InlayHint[] {
+  ) {
     const config = getConfig();
 
     if (!config.enabled || !isLanguageSupported(document.languageId)) {
@@ -22,7 +22,7 @@ export class ClassNameInlayHintsProvider implements vscode.InlayHintsProvider {
     }
 
     const text = document.getText();
-    const hints = extractHints(text, config.maxLength, config.truncateType, config.truncatePosition);
+    const hints = extractHints(text, config.maxLength, config.truncateType, config.truncatePosition, config.transformPatterns);
 
     return hints
       .filter((hint) => {
@@ -43,7 +43,7 @@ export class ClassNameInlayHintsProvider implements vscode.InlayHintsProvider {
       });
   }
 
-  dispose(): void {
+  dispose() {
     this._onDidChangeInlayHints.dispose();
   }
 }

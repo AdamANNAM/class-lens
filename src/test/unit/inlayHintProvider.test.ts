@@ -99,43 +99,18 @@ describe('ClassNameInlayHintsProvider', () => {
     expect(hints[0].label).toBe('// a-ver...');
   });
 
-  it('applies word+end truncation from config', () => {
-    _setMockConfig('classnamePreview', { maxLength: 20, truncateType: 'word', truncatePosition: 'end' });
-
+  it.each([
+    [{ maxLength: 20, truncateType: 'word', truncatePosition: 'end' }, '// flex items-center...'],
+    [{ maxLength: 25, truncateType: 'word', truncatePosition: 'start' }, '// ...justify-between gap-4'],
+    [{ maxLength: 21, truncateType: 'character', truncatePosition: 'start' }, '// ...justify-between gap-4'],
+  ])('applies truncation config %j', (configOverrides, expectedLabel) => {
+    _setMockConfig('classnamePreview', configOverrides);
     const text = '<div className="flex items-center justify-between gap-4">hello</div>';
     const doc = makeMockDocument(text);
     const range = makeRange(0, 0, 0, text.length);
-
     const hints = provider.provideInlayHints(doc, range, mockToken);
-
     expect(hints).toHaveLength(1);
-    expect(hints[0].label).toBe('// flex items-center...');
-  });
-
-  it('applies word+start truncation from config', () => {
-    _setMockConfig('classnamePreview', { maxLength: 25, truncateType: 'word', truncatePosition: 'start' });
-
-    const text = '<div className="flex items-center justify-between gap-4">hello</div>';
-    const doc = makeMockDocument(text);
-    const range = makeRange(0, 0, 0, text.length);
-
-    const hints = provider.provideInlayHints(doc, range, mockToken);
-
-    expect(hints).toHaveLength(1);
-    expect(hints[0].label).toBe('// ...justify-between gap-4');
-  });
-
-  it('applies character+start truncation from config', () => {
-    _setMockConfig('classnamePreview', { maxLength: 21, truncateType: 'character', truncatePosition: 'start' });
-
-    const text = '<div className="flex items-center justify-between gap-4">hello</div>';
-    const doc = makeMockDocument(text);
-    const range = makeRange(0, 0, 0, text.length);
-
-    const hints = provider.provideInlayHints(doc, range, mockToken);
-
-    expect(hints).toHaveLength(1);
-    expect(hints[0].label).toBe('// ...justify-between gap-4');
+    expect(hints[0].label).toBe(expectedLabel);
   });
 
   it('filters hints outside the requested range', () => {

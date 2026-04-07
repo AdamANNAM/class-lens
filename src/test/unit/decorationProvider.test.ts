@@ -1,35 +1,26 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { Position, Range, window } from './__mocks__/vscode.js';
-import { buildDecorations, createDecorationType, clearDecorations, disposeDecorationType } from '../../decorationProvider.js';
-import { HintData, ClassNamePreviewConfig } from '../../types.js';
+import { describe, it, expect, vi } from 'vitest';
+import { Position, window } from './__mocks__/vscode.js';
+import { buildDecorations, createDecorationType, clearDecorations } from '../../decorationProvider.js';
+import type { HintData, ClassNamePreviewConfig } from '../../types.js';
 
-function makeConfig(overrides: Partial<ClassNamePreviewConfig> = {}): ClassNamePreviewConfig {
-  return {
-    enabled: true,
-    renderMode: 'decoration',
-    maxLength: 0,
-    truncateType: 'character',
-    truncatePosition: 'end',
-    fontStyle: 'italic',
-    opacity: '0.6',
-    prefix: '// ',
-    excludedLanguages: [],
-    ...overrides,
-  };
-}
-
-function makeMockDocument(): any {
-  return {
-    getText: vi.fn(() => ''),
-    lineCount: 10,
-    uri: { fsPath: '/test.tsx' },
-  };
-}
+const makeConfig = (overrides: Partial<ClassNamePreviewConfig> = {}): ClassNamePreviewConfig => ({
+  enabled: true,
+  renderMode: 'decoration',
+  maxLength: 0,
+  truncateType: 'character',
+  truncatePosition: 'end',
+  fontStyle: 'italic',
+  opacity: '0.6',
+  prefix: '// ',
+  excludedLanguages: [],
+  transformPatterns: [],
+  ...overrides,
+});
 
 describe('decorationProvider', () => {
   describe('buildDecorations', () => {
     it('returns empty array for no hints', () => {
-      const result = buildDecorations([], makeMockDocument(), makeConfig());
+      const result = buildDecorations([], makeConfig());
       expect(result).toEqual([]);
     });
 
@@ -38,11 +29,10 @@ describe('decorationProvider', () => {
         { value: 'container', closingTagEnd: { line: 2, character: 5 }, tagName: 'div' },
       ];
 
-      const result = buildDecorations(hints, makeMockDocument(), makeConfig());
+      const result = buildDecorations(hints, makeConfig());
 
       expect(result).toHaveLength(1);
       const dec = result[0];
-      // Position should be character + 1 (after the '>')
       expect(dec.range.start).toBeInstanceOf(Position);
       expect(dec.range.start.line).toBe(2);
       expect(dec.range.start.character).toBe(6);
@@ -53,7 +43,7 @@ describe('decorationProvider', () => {
         { value: 'foo bar', closingTagEnd: { line: 0, character: 10 }, tagName: 'div' },
       ];
 
-      const result = buildDecorations(hints, makeMockDocument(), makeConfig({ prefix: '// ' }));
+      const result = buildDecorations(hints, makeConfig({ prefix: '// ' }));
 
       expect(result[0].renderOptions?.after?.contentText).toBe('// foo bar');
     });
@@ -63,7 +53,7 @@ describe('decorationProvider', () => {
         { value: 'test', closingTagEnd: { line: 0, character: 5 }, tagName: 'div' },
       ];
 
-      const result = buildDecorations(hints, makeMockDocument(), makeConfig({ prefix: '/* ' }));
+      const result = buildDecorations(hints, makeConfig({ prefix: '/* ' }));
 
       expect(result[0].renderOptions?.after?.contentText).toBe('/* test');
     });
@@ -73,7 +63,7 @@ describe('decorationProvider', () => {
         { value: 'test', closingTagEnd: { line: 0, character: 5 }, tagName: 'div' },
       ];
 
-      const result = buildDecorations(hints, makeMockDocument(), makeConfig({ fontStyle: 'normal' }));
+      const result = buildDecorations(hints, makeConfig({ fontStyle: 'normal' }));
 
       expect(result[0].renderOptions?.after?.fontStyle).toBe('normal');
     });
@@ -83,7 +73,7 @@ describe('decorationProvider', () => {
         { value: 'test', closingTagEnd: { line: 0, character: 5 }, tagName: 'div' },
       ];
 
-      const result = buildDecorations(hints, makeMockDocument(), makeConfig({ opacity: '0.3' }));
+      const result = buildDecorations(hints, makeConfig({ opacity: '0.3' }));
 
       expect((result[0].renderOptions?.after as any)?.opacity).toBe('0.3');
     });
@@ -95,7 +85,7 @@ describe('decorationProvider', () => {
         { value: 'third', closingTagEnd: { line: 7, character: 2 }, tagName: 'p' },
       ];
 
-      const result = buildDecorations(hints, makeMockDocument(), makeConfig());
+      const result = buildDecorations(hints, makeConfig());
 
       expect(result).toHaveLength(3);
       expect(result[0].renderOptions?.after?.contentText).toBe('// first');
@@ -108,7 +98,7 @@ describe('decorationProvider', () => {
         { value: 'test', closingTagEnd: { line: 4, character: 8 }, tagName: 'div' },
       ];
 
-      const result = buildDecorations(hints, makeMockDocument(), makeConfig());
+      const result = buildDecorations(hints, makeConfig());
       const range = result[0].range;
 
       expect(range.start.line).toBe(range.end.line);
@@ -134,10 +124,7 @@ describe('decorationProvider', () => {
 
   describe('clearDecorations', () => {
     it('calls setDecorations with empty array', () => {
-      const mockEditor = {
-        setDecorations: vi.fn(),
-        document: makeMockDocument(),
-      } as any;
+      const mockEditor = { setDecorations: vi.fn() } as any;
       const mockType = { dispose: vi.fn(), key: 'test' } as any;
 
       clearDecorations(mockEditor, mockType);

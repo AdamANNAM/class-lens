@@ -23,6 +23,12 @@ export interface OpeningTagInfo {
   selfClosing: boolean;
 }
 
+export interface TransformPattern {
+  pattern: string;
+  replacement: string;
+  flags: string;
+}
+
 export interface ClassNamePreviewConfig {
   enabled: boolean;
   renderMode: 'decoration' | 'inlayHint';
@@ -33,4 +39,5 @@ export interface ClassNamePreviewConfig {
   opacity: string;
   prefix: string;
   excludedLanguages: string[];
+  transformPatterns: TransformPattern[];
 }
