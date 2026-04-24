@@ -1,20 +1,29 @@
-import * as vscode from 'vscode';
-import type { HintData, ClassNamePreviewConfig } from './types.js';
+import {
+  DecorationOptions,
+  DecorationRangeBehavior,
+  Position,
+  Range,
+  TextEditor,
+  TextEditorDecorationType,
+  ThemeColor,
+  window,
+} from 'vscode';
+import type { ClassNamePreviewConfig, HintData } from './types.js';
 
-let decorationType: vscode.TextEditorDecorationType | undefined;
+let decorationType: TextEditorDecorationType | undefined;
 
 export const createDecorationType = (config: ClassNamePreviewConfig) => {
   if (decorationType) {
     decorationType.dispose();
   }
 
-  decorationType = vscode.window.createTextEditorDecorationType({
+  decorationType = window.createTextEditorDecorationType({
     after: {
-      color: new vscode.ThemeColor('editorCodeLens.foreground'),
+      color: new ThemeColor('editorCodeLens.foreground'),
       fontStyle: config.fontStyle,
       margin: '0 0 0 1em',
     },
-    rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
+    rangeBehavior: DecorationRangeBehavior.ClosedClosed,
   });
 
   return decorationType;
@@ -22,14 +31,16 @@ export const createDecorationType = (config: ClassNamePreviewConfig) => {
 
 export const buildDecorations = (
   hints: HintData[],
-  config: ClassNamePreviewConfig
-): vscode.DecorationOptions[] =>
+  config: ClassNamePreviewConfig,
+): DecorationOptions[] =>
   hints.map((hint) => {
-    const pos = new vscode.Position(hint.closingTagEnd.line, hint.closingTagEnd.character + 1);
-    const range = new vscode.Range(pos, pos);
+    const pos = new Position(
+      hint.closingTagEnd.line,
+      hint.closingTagEnd.character + 1,
+    );
 
     return {
-      range,
+      range: new Range(pos, pos),
       renderOptions: {
         after: {
           contentText: `${config.prefix}${hint.value}`,
@@ -41,18 +52,18 @@ export const buildDecorations = (
   });
 
 export const applyDecorations = (
-  editor: vscode.TextEditor,
+  editor: TextEditor,
   hints: HintData[],
   config: ClassNamePreviewConfig,
-  type: vscode.TextEditorDecorationType
+  type: TextEditorDecorationType,
 ) => {
   const decorations = buildDecorations(hints, config);
   editor.setDecorations(type, decorations);
 };
 
 export const clearDecorations = (
-  editor: vscode.TextEditor,
-  type: vscode.TextEditorDecorationType
+  editor: TextEditor,
+  type: TextEditorDecorationType,
 ) => {
   editor.setDecorations(type, []);
 };

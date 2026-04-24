@@ -12,14 +12,14 @@ describe('configuration', () => {
       const config = getConfig();
       expect(config.enabled).toBe(true);
       expect(config.renderMode).toBe('decoration');
-      expect(config.maxLength).toBe(0);
-      expect(config.truncateType).toBe('character');
+      expect(config.maxLength).toBe(50);
+      expect(config.truncateType).toBe('word');
       expect(config.truncatePosition).toBe('end');
       expect(config.fontStyle).toBe('italic');
-      expect(config.opacity).toBe('0.6');
+      expect(config.opacity).toBe('0.9');
       expect(config.prefix).toBe('// ');
       expect(config.excludedLanguages).toEqual([]);
-      expect(config.transformPatterns).toEqual([]);
+      expect(config.transformPatterns).toHaveLength(7);
     });
 
     it('returns overridden values from workspace config', () => {
@@ -55,7 +55,7 @@ describe('configuration', () => {
       const config = getConfig();
       expect(config.enabled).toBe(false);
       expect(config.renderMode).toBe('decoration');
-      expect(config.maxLength).toBe(0);
+      expect(config.maxLength).toBe(50);
       expect(config.excludedLanguages).toEqual([]);
     });
   });
@@ -126,15 +126,17 @@ describe('configuration', () => {
 
     it('preserves explicitly set flags', () => {
       _setMockConfig('classnamePreview', {
-        transformPatterns: [{ pattern: 'foo', replacement: 'bar', flags: 'si' }],
+        transformPatterns: [
+          { pattern: 'foo', replacement: 'bar', flags: 'si' },
+        ],
       });
       const config = getConfig();
       expect(config.transformPatterns[0].flags).toBe('si');
     });
 
-    it('returns empty array when not configured', () => {
+    it('returns default patterns when not configured', () => {
       const config = getConfig();
-      expect(config.transformPatterns).toEqual([]);
+      expect(config.transformPatterns).toHaveLength(7);
     });
   });
 });

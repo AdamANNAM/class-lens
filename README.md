@@ -45,7 +45,7 @@ All settings are under `classnamePreview.*` in VS Code settings.
 | `renderMode` | `"decoration"` | `"decoration"` for text decorations, `"inlayHint"` for native inlay hints |
 | `maxLength` | `0` | Truncate long values (0 = no limit) |
 | `fontStyle` | `"italic"` | `"italic"` or `"normal"` |
-| `opacity` | `"0.6"` | Opacity of the annotation text |
+| `opacity` | `"0.9"` | Opacity of the annotation text |
 | `prefix` | `"// "` | Text before the class value |
 | `excludedLanguages` | `[]` | Language IDs to exclude (e.g. `["markdown", "json"]`) |
 
