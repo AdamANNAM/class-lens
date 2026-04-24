@@ -190,3 +190,49 @@ describe('applyTransforms — empty patterns', () => {
     expect(applyTransforms('hello', [])).toBe('hello');
   });
 });
+
+// ─── applyTransforms — className variable removal ───────────────────
+
+describe('applyTransforms — className variable removal', () => {
+  const patterns: TransformPattern[] = [
+    { pattern: '\\bclassName\\b\\s*,\\s*|,\\s*\\bclassName\\b|\\bclassName\\b', replacement: '', flags: 'g' },
+  ];
+
+  it.each([
+    ['className, foo', 'foo'],
+    ['foo, className', 'foo'],
+    ['foo, className, bar', 'foo, bar'],
+    ['className', ''],
+    ['myClassName', 'myClassName'],
+    ['classNameExtra', 'classNameExtra'],
+  ])('transforms %s → %s', (input, expected) => {
+    expect(applyTransforms(input, patterns)).toBe(expected);
+  });
+});
+
+// ─── applyTransforms — full defaults ────────────────────────────────
+
+describe('applyTransforms — full defaults', () => {
+  const defaults: TransformPattern[] = [
+    { pattern: '^classNames\\((.*)\\)$', replacement: '$1', flags: 's' },
+    { pattern: '^clsx\\((.*)\\)$', replacement: '$1', flags: 's' },
+    { pattern: '^cx\\((.*)\\)$', replacement: '$1', flags: 's' },
+    { pattern: '^cn\\((.*)\\)$', replacement: '$1', flags: 's' },
+    { pattern: 'styles\\.', replacement: '', flags: 'g' },
+    { pattern: '\\$style\\.', replacement: '', flags: 'g' },
+    { pattern: '\\bclassName\\b\\s*,\\s*|,\\s*\\bclassName\\b|\\bclassName\\b', replacement: '', flags: 'g' },
+  ];
+
+  it.each([
+    ['classNames(className, styles.AlertsInfoItem)', 'AlertsInfoItem'],
+    ["clsx('flex', 'mt-2')", "'flex', 'mt-2'"],
+    ['cn(styles.base, isActive && styles.active)', 'base, isActive && active'],
+    ["cx('a', 'b')", "'a', 'b'"],
+    ['$style.container', 'container'],
+    ['styles.wrapper', 'wrapper'],
+    ['className', ''],
+    ['plain-string', 'plain-string'],
+  ])('transforms %s → %s', (input, expected) => {
+    expect(applyTransforms(input, defaults)).toBe(expected);
+  });
+});
