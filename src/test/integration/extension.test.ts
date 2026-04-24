@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 
 const fixturesPath = path.resolve(__dirname, '../../../test-fixtures');
-const EXT_ID = 'adamholmes.class-lens';
+const EXT_ID = 'Homuzu.class-lens';
 
 suite('Class Lens Extension', () => {
   suiteSetup(async () => {
@@ -76,6 +76,9 @@ suite('Class Lens Extension', () => {
     await vscode.workspace
       .getConfiguration('classnamePreview')
       .update('renderMode', 'inlayHint', vscode.ConfigurationTarget.Global);
+    await vscode.workspace
+      .getConfiguration('classnamePreview')
+      .update('maxLength', 0, vscode.ConfigurationTarget.Global);
 
     const uri = vscode.Uri.file(path.join(fixturesPath, 'tailwind.tsx'));
     const document = await vscode.workspace.openTextDocument(uri);
@@ -128,6 +131,9 @@ suite('Class Lens Extension', () => {
     await vscode.workspace
       .getConfiguration('classnamePreview')
       .update('renderMode', undefined, vscode.ConfigurationTarget.Global);
+    await vscode.workspace
+      .getConfiguration('classnamePreview')
+      .update('maxLength', undefined, vscode.ConfigurationTarget.Global);
   });
 
   test('Inlay hints should respect maxLength truncation on long Tailwind classes', async () => {
