@@ -7,5 +7,10 @@ vitest.config.ts
 esbuild.js
 tsconfig.json
 test-fixtures/**
-generate-icon.js
 .claude/**
+.github/**
+demo/**
+dist/test/**
+eslint.config.mjs
+.vscode-test.mjs
+package-lock.json

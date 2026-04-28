@@ -2,6 +2,18 @@
 
 See your `className` and `class` values at a glance. Class Lens displays inline annotations next to closing tags, so you always know which CSS classes an element uses without scrolling back to the opening tag.
 
+![Class Lens in action](images/screenshot.png)
+
+## Installation
+
+Search for **Class Lens** in the VS Code Extensions sidebar (`Ctrl+Shift+X` / `Cmd+Shift+X`) and click **Install**.
+
+Alternatively, install from the command line:
+
+```
+code --install-extension Homuzu.class-lens
+```
+
 ## What It Does
 
 ```jsx
@@ -28,10 +40,10 @@ When your JSX, HTML, or template markup gets deeply nested, matching a `</div>` 
 |------|------------|
 | `className="flex gap-4"` | `flex gap-4` |
 | `class="container mx-auto"` | `container mx-auto` |
-| `className={styles.wrapper}` | `styles.wrapper` |
+| `className={styles.wrapper}` | `wrapper` |
 | `` className={`text-${color}`} `` | `` text-${color} `` |
 | `className={active ? 'on' : 'off'}` | `active ? 'on' : 'off'` |
-| `className={cn('base', { bold: x })}` | `cn('base', { bold: x })` |
+| `className={cn('base', { bold: x })}` | `'base', { bold: x }` |
 
 Self-closing tags (`<img />`, `<br />`, `<input />`) are ignored since they have no closing tag.
 
@@ -43,11 +55,14 @@ All settings are under `classnamePreview.*` in VS Code settings.
 |---------|---------|-------------|
 | `enabled` | `true` | Enable or disable annotations |
 | `renderMode` | `"decoration"` | `"decoration"` for text decorations, `"inlayHint"` for native inlay hints |
-| `maxLength` | `0` | Truncate long values (0 = no limit) |
+| `maxLength` | `50` | Truncate long values (0 = no limit) |
+| `truncateType` | `"word"` | `"character"` for exact count, `"word"` for word boundary |
+| `truncatePosition` | `"end"` | `"end"` keeps the start, `"start"` keeps the end |
 | `fontStyle` | `"italic"` | `"italic"` or `"normal"` |
 | `opacity` | `"0.9"` | Opacity of the annotation text |
 | `prefix` | `"// "` | Text before the class value |
 | `excludedLanguages` | `[]` | Language IDs to exclude (e.g. `["markdown", "json"]`) |
+| `transformPatterns` | `[...]` | Regex transforms applied to values before display (strips `styles.` prefixes, unwraps `cn()`/`clsx()`/`cx()`/`classNames()` calls, etc.) |
 
 ## Render Modes
 
@@ -68,3 +83,15 @@ Yes. Class Lens runs on all languages by default. If it finds `className=` or `c
 
 **Why don't I see annotations on `<img />` or `<br />`?**
 Self-closing tags have no closing tag to annotate, so they're skipped.
+
+## Known Issues
+
+No known issues at this time. If you find a bug, please [open an issue](https://github.com/AdamANNAM/class-lens/issues).
+
+## Contributing
+
+Contributions are welcome! Please [open an issue](https://github.com/AdamANNAM/class-lens/issues) to report bugs or suggest features before submitting a pull request.
+
+## License
+
+[MIT](LICENSE)
