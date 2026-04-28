@@ -1,7 +1,7 @@
 {
   "name": "class-lens",
   "displayName": "Class Lens — className & CSS Class Annotations",
-  "description": "See className and CSS class values as inline annotations next to closing tags in JSX, TSX, HTML, Vue, Svelte, Astro, and more",
+  "description": "See className and CSS class values as inline annotations next to closing tags in languages such as JSX, TSX, HTML, Vue, Svelte, Astro, and more",
   "version": "0.1.0",
   "publisher": "Homuzu",
   "license": "MIT",
@@ -9,9 +9,14 @@
     "type": "git",
     "url": "https://github.com/AdamANNAM/class-lens"
   },
+  "homepage": "https://github.com/AdamANNAM/class-lens",
+  "bugs": {
+    "url": "https://github.com/AdamANNAM/class-lens/issues"
+  },
+  "qna": "marketplace",
   "icon": "icon.png",
   "engines": {
-    "vscode": "^1.85.0"
+    "vscode": "^1.67.0"
   },
   "categories": [
     "Visualization"
@@ -156,22 +161,23 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
-    "compile": "npm run check-types && node esbuild.js && tsc -p src/test/tsconfig.json",
-    "check-types": "tsc --noEmit",
+    "compile": "npm run type-check && tsc -p src/test/tsconfig.json && node esbuild.js",
+    "type-check": "tsc --noEmit",
     "watch": "node esbuild.js --watch",
-    "package": "npm run check-types && node esbuild.js --production",
+    "package": "npm run type-check && node esbuild.js --production",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
     "pretest": "npm run compile",
     "test": "vscode-test",
     "lint": "eslint src",
-    "vsix": "npm run package && vsce package --no-dependencies"
+    "vsix": "npm run package && vsce package --no-dependencies",
+    "vsix:install": "npm run vsix && code --install-extension class-lens-0.1.0.vsix"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/mocha": "^10.0.10",
     "@types/node": "^25.6.0",
-    "@types/vscode": "^1.116.0",
+    "@types/vscode": "^1.67.0",
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^3.9.1",
