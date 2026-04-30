@@ -1,30 +1,46 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { Position, Range, _setMockConfig, _clearMockConfig } from './__mocks__/vscode.js';
+import { beforeEach, describe, expect, it } from 'vitest';
+import type { TextDocument, Range as VSCRange } from 'vscode';
 import { ClassNameInlayHintsProvider } from '../../inlayHintProvider.js';
+import {
+  Position,
+  Range,
+  _clearMockConfig,
+  _setMockConfig,
+} from './__mocks__/vscode.js';
 
-function makeMockDocument(text: string, languageId: string = 'typescriptreact'): any {
-  return {
+const makeMockDocument = (
+  text: string,
+  languageId: string = 'typescriptreact',
+) =>
+  ({
     getText: () => text,
     lineCount: text.split('\n').length,
     uri: { fsPath: '/test.tsx' },
     languageId,
-  };
-}
+  }) as unknown as TextDocument;
 
-function makeRange(startLine: number, startChar: number, endLine: number, endChar: number): any {
-  return new Range(
+const makeRange = (
+  startLine: number,
+  startChar: number,
+  endLine: number,
+  endChar: number,
+) =>
+  new Range(
     new Position(startLine, startChar),
-    new Position(endLine, endChar)
-  );
-}
+    new Position(endLine, endChar),
+  ) as VSCRange;
 
-const mockToken: any = { isCancellationRequested: false, onCancellationRequested: () => ({ dispose: () => {} }) };
+const mockToken = {
+  isCancellationRequested: false,
+  onCancellationRequested: () => ({ dispose: () => {} }),
+};
 
 describe('ClassNameInlayHintsProvider', () => {
   let provider: ClassNameInlayHintsProvider;
 
   beforeEach(() => {
     _clearMockConfig();
+    _setMockConfig('classLens', { showSameLine: true });
     provider = new ClassNameInlayHintsProvider();
   });
 
@@ -36,12 +52,12 @@ describe('ClassNameInlayHintsProvider', () => {
     const hints = provider.provideInlayHints(doc, range, mockToken);
 
     expect(hints).toHaveLength(1);
-    expect(hints[0].label).toBe('// container');
+    expect(hints[0].label).toBe('/* container */');
     expect(hints[0].paddingLeft).toBe(true);
   });
 
   it('returns empty array when disabled', () => {
-    _setMockConfig('classnamePreview', { enabled: false });
+    _setMockConfig('classLens', { enabled: false });
 
     const text = '<div className="container">hello</div>';
     const doc = makeMockDocument(text);
@@ -52,7 +68,7 @@ describe('ClassNameInlayHintsProvider', () => {
   });
 
   it('returns empty array when language is excluded', () => {
-    _setMockConfig('classnamePreview', { excludedLanguages: ['python'] });
+    _setMockConfig('classLens', { excludedLanguages: ['python'] });
 
     const text = '<div className="container">hello</div>';
     const doc = makeMockDocument(text, 'python');
@@ -63,7 +79,7 @@ describe('ClassNameInlayHintsProvider', () => {
   });
 
   it('returns hints for a language not in the excludelist', () => {
-    _setMockConfig('classnamePreview', { excludedLanguages: ['python'] });
+    _setMockConfig('classLens', { excludedLanguages: ['python'] });
 
     const text = '<div className="container">hello</div>';
     const doc = makeMockDocument(text, 'astro');
@@ -73,8 +89,8 @@ describe('ClassNameInlayHintsProvider', () => {
     expect(hints).toHaveLength(1);
   });
 
-  it('applies prefix from config', () => {
-    _setMockConfig('classnamePreview', { prefix: '/* ' });
+  it('applies prefix from config (auto-inserts space, ignores user trailing space)', () => {
+    _setMockConfig('classLens', { prefix: '/* ', suffix: '' });
 
     const text = '<div className="test">hello</div>';
     const doc = makeMockDocument(text);
@@ -86,8 +102,21 @@ describe('ClassNameInlayHintsProvider', () => {
     expect(hints[0].label).toBe('/* test');
   });
 
+  it('appends suffix when set', () => {
+    _setMockConfig('classLens', { prefix: '/*', suffix: '*/' });
+
+    const text = '<div className="test">hello</div>';
+    const doc = makeMockDocument(text);
+    const range = makeRange(0, 0, 0, text.length);
+
+    const hints = provider.provideInlayHints(doc, range, mockToken);
+
+    expect(hints).toHaveLength(1);
+    expect(hints[0].label).toBe('/* test */');
+  });
+
   it('applies maxLength truncation from config', () => {
-    _setMockConfig('classnamePreview', { maxLength: 5 });
+    _setMockConfig('classLens', { maxLength: 5 });
 
     const text = '<div className="a-very-long-class-name">hello</div>';
     const doc = makeMockDocument(text);
@@ -96,16 +125,26 @@ describe('ClassNameInlayHintsProvider', () => {
     const hints = provider.provideInlayHints(doc, range, mockToken);
 
     expect(hints).toHaveLength(1);
-    expect(hints[0].label).toBe('// a-ver...');
+    expect(hints[0].label).toBe('/* a-ver... */');
   });
 
   it.each([
-    [{ maxLength: 20, truncateType: 'word', truncatePosition: 'end' }, '// flex items-center...'],
-    [{ maxLength: 25, truncateType: 'word', truncatePosition: 'start' }, '// ...justify-between gap-4'],
-    [{ maxLength: 21, truncateType: 'character', truncatePosition: 'start' }, '// ...justify-between gap-4'],
+    [
+      { maxLength: 20, truncateType: 'word', truncatePosition: 'end' },
+      '/* flex items-center... */',
+    ],
+    [
+      { maxLength: 25, truncateType: 'word', truncatePosition: 'start' },
+      '/* ...justify-between gap-4 */',
+    ],
+    [
+      { maxLength: 21, truncateType: 'character', truncatePosition: 'start' },
+      '/* ...justify-between gap-4 */',
+    ],
   ])('applies truncation config %j', (configOverrides, expectedLabel) => {
-    _setMockConfig('classnamePreview', configOverrides);
-    const text = '<div className="flex items-center justify-between gap-4">hello</div>';
+    _setMockConfig('classLens', configOverrides);
+    const text =
+      '<div className="flex items-center justify-between gap-4">hello</div>';
     const doc = makeMockDocument(text);
     const range = makeRange(0, 0, 0, text.length);
     const hints = provider.provideInlayHints(doc, range, mockToken);
@@ -124,7 +163,7 @@ describe('ClassNameInlayHintsProvider', () => {
     const hints = provider.provideInlayHints(doc, range, mockToken);
 
     expect(hints).toHaveLength(1);
-    expect(hints[0].label).toBe('// second');
+    expect(hints[0].label).toBe('/* second */');
   });
 
   it('returns multiple hints for multi-line content', () => {
@@ -137,8 +176,8 @@ describe('ClassNameInlayHintsProvider', () => {
     const hints = provider.provideInlayHints(doc, range, mockToken);
 
     expect(hints).toHaveLength(2);
-    expect(hints[0].label).toBe('// inner');
-    expect(hints[1].label).toBe('// outer');
+    expect(hints[0].label).toBe('/* inner */');
+    expect(hints[1].label).toBe('/* outer */');
   });
 
   it('positions hints after the closing tag character', () => {
@@ -163,13 +202,63 @@ describe('ClassNameInlayHintsProvider', () => {
     expect(hints).toHaveLength(0);
   });
 
-  it('handles self-closing tags (no hints)', () => {
+  it('shows hint for single-line self-closing tag when showSameLine is true', () => {
+    const text = '<img className="hero" />';
+    const doc = makeMockDocument(text);
+    const range = makeRange(0, 0, 0, text.length);
+
+    const hints = provider.provideInlayHints(doc, range, mockToken);
+    expect(hints).toHaveLength(1);
+    expect(hints[0].label).toBe('/* hero */');
+  });
+
+  it('suppresses self-closing tag hints when hideSelfClosing is true', () => {
+    _setMockConfig('classLens', {
+      showSameLine: true,
+      hideSelfClosing: true,
+    });
     const text = '<img className="hero" />';
     const doc = makeMockDocument(text);
     const range = makeRange(0, 0, 0, text.length);
 
     const hints = provider.provideInlayHints(doc, range, mockToken);
     expect(hints).toHaveLength(0);
+  });
+
+  describe('showSameLine', () => {
+    it('hides hint for same-line tag by default (showSameLine omitted)', () => {
+      _clearMockConfig();
+      const text = '<div className="container">hello</div>';
+      const doc = makeMockDocument(text);
+      const range = makeRange(0, 0, 0, text.length);
+
+      const hints = provider.provideInlayHints(doc, range, mockToken);
+      expect(hints).toHaveLength(0);
+    });
+
+    it('shows hint for same-line tag when showSameLine is true', () => {
+      _setMockConfig('classLens', { showSameLine: true });
+      const text = '<div className="container">hello</div>';
+      const doc = makeMockDocument(text);
+      const range = makeRange(0, 0, 0, text.length);
+
+      const hints = provider.provideInlayHints(doc, range, mockToken);
+      expect(hints).toHaveLength(1);
+      expect(hints[0].label).toBe('/* container */');
+    });
+
+    it('shows hint for multi-line tag regardless of showSameLine setting', () => {
+      _clearMockConfig();
+      const text = `<div className="outer">
+  hello
+</div>`;
+      const doc = makeMockDocument(text);
+      const range = makeRange(0, 0, 2, 10);
+
+      const hints = provider.provideInlayHints(doc, range, mockToken);
+      expect(hints).toHaveLength(1);
+      expect(hints[0].label).toBe('/* outer */');
+    });
   });
 
   describe('refresh', () => {

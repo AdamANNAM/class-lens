@@ -1,7 +1,7 @@
 import { workspace } from 'vscode';
-import type { ClassNamePreviewConfig, TransformPattern } from './types.js';
+import type { ClassLensConfig, TransformPattern } from './types.js';
 
-const SECTION = 'classnamePreview';
+const SECTION = 'classLens';
 
 const DEFAULT_TRANSFORM_PATTERNS: TransformPattern[] = [
   { pattern: '^classNames\\((.*)\\)$', replacement: '$1', flags: 's' },
@@ -10,10 +10,14 @@ const DEFAULT_TRANSFORM_PATTERNS: TransformPattern[] = [
   { pattern: '^cn\\((.*)\\)$', replacement: '$1', flags: 's' },
   { pattern: 'styles\\.', replacement: '', flags: 'g' },
   { pattern: '\\$style\\.', replacement: '', flags: 'g' },
-  { pattern: '\\bclassName\\b\\s*,\\s*|,\\s*\\bclassName\\b|\\bclassName\\b', replacement: '', flags: 'g' },
+  {
+    pattern: '\\bclassName\\b\\s*,\\s*|,\\s*\\bclassName\\b|\\bclassName\\b',
+    replacement: '',
+    flags: 'g',
+  },
 ];
 
-export const getConfig = (): ClassNamePreviewConfig => {
+export const getConfig = (): ClassLensConfig => {
   const config = workspace.getConfiguration(SECTION);
 
   const partialPatterns = config.get<Partial<TransformPattern>[]>(
@@ -35,12 +39,15 @@ export const getConfig = (): ClassNamePreviewConfig => {
       'renderMode',
       'decoration',
     ),
-    maxLength: config.get<number>('maxLength', 50),
+    maxLength: config.get<number>('maxLength', 40),
     truncateType: config.get<'character' | 'word'>('truncateType', 'word'),
     truncatePosition: config.get<'end' | 'start'>('truncatePosition', 'end'),
-    fontStyle: config.get<'italic' | 'normal'>('fontStyle', 'italic'),
     opacity: config.get<string>('opacity', '0.9'),
-    prefix: config.get<string>('prefix', '// '),
+    prefix: config.get<string>('prefix', '/*'),
+    suffix: config.get<string>('suffix', '*/'),
+    ellipsis: config.get<string>('ellipsis', '...'),
+    showSameLine: config.get<boolean>('showSameLine', false),
+    hideSelfClosing: config.get<boolean>('hideSelfClosing', false),
     excludedLanguages: config.get<string[]>('excludedLanguages', []),
     transformPatterns,
   };

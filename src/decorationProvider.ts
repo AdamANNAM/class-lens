@@ -8,20 +8,18 @@ import {
   ThemeColor,
   window,
 } from 'vscode';
-import type { ClassNamePreviewConfig, HintData } from './types.js';
+import type { ClassLensConfig, HintData } from './types.js';
 
 let decorationType: TextEditorDecorationType | undefined;
 
-export const createDecorationType = (config: ClassNamePreviewConfig) => {
-  if (decorationType) {
-    decorationType.dispose();
-  }
+export const createDecorationType = () => {
+  decorationType?.dispose();
 
   decorationType = window.createTextEditorDecorationType({
     after: {
       color: new ThemeColor('editorCodeLens.foreground'),
-      fontStyle: config.fontStyle,
-      margin: '0 0 0 1em',
+      fontStyle: 'italic',
+      margin: '0 1em',
     },
     rangeBehavior: DecorationRangeBehavior.ClosedClosed,
   });
@@ -31,7 +29,7 @@ export const createDecorationType = (config: ClassNamePreviewConfig) => {
 
 export const buildDecorations = (
   hints: HintData[],
-  config: ClassNamePreviewConfig,
+  config: ClassLensConfig,
 ): DecorationOptions[] =>
   hints.map((hint) => {
     const pos = new Position(
@@ -43,8 +41,10 @@ export const buildDecorations = (
       range: new Range(pos, pos),
       renderOptions: {
         after: {
-          contentText: `${config.prefix}${hint.value}`,
-          fontStyle: config.fontStyle,
+          contentText: [config.prefix.trim(), hint.value, config.suffix.trim()]
+            .filter(Boolean)
+            .join(' '),
+          fontStyle: 'italic',
           opacity: config.opacity,
         },
       },
@@ -54,7 +54,7 @@ export const buildDecorations = (
 export const applyDecorations = (
   editor: TextEditor,
   hints: HintData[],
-  config: ClassNamePreviewConfig,
+  config: ClassLensConfig,
   type: TextEditorDecorationType,
 ) => {
   const decorations = buildDecorations(hints, config);
@@ -69,8 +69,6 @@ export const clearDecorations = (
 };
 
 export const disposeDecorationType = () => {
-  if (decorationType) {
-    decorationType.dispose();
-    decorationType = undefined;
-  }
+  decorationType?.dispose();
+  decorationType = undefined;
 };

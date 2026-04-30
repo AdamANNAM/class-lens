@@ -1,37 +1,41 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { extractHints } from '../../parser.js';
 
 // ─── Tailwind CSS scenarios ──────────────────────────────────────────
 
 describe('Tailwind CSS class names', () => {
   it('handles a long Tailwind utility string', () => {
-    const tw = 'flex items-center justify-between gap-4 rounded-lg bg-white p-6 shadow-md hover:shadow-lg transition-shadow duration-200';
+    const tw =
+      'flex items-center justify-between gap-4 rounded-lg bg-white p-6 shadow-md hover:shadow-lg transition-shadow duration-200';
     const text = `<div className="${tw}">content</div>`;
-    const hints = extractHints(text);
+    const hints = extractHints(text, { showSameLine: true });
     expect(hints).toHaveLength(1);
     expect(hints[0].value).toBe(tw);
   });
 
   it('truncates a long Tailwind string with maxLength', () => {
-    const tw = 'flex items-center justify-between gap-4 rounded-lg bg-white p-6 shadow-md hover:shadow-lg transition-shadow duration-200';
+    const tw =
+      'flex items-center justify-between gap-4 rounded-lg bg-white p-6 shadow-md hover:shadow-lg transition-shadow duration-200';
     const text = `<div className="${tw}">content</div>`;
-    const hints = extractHints(text, 30);
+    const hints = extractHints(text, { maxLength: 30, showSameLine: true });
     expect(hints).toHaveLength(1);
     expect(hints[0].value).toBe('flex items-center justify-betw...');
   });
 
   it('handles Tailwind with responsive and state prefixes', () => {
-    const tw = 'w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 hover:bg-blue-500 focus:ring-2 focus:ring-blue-300 dark:bg-gray-800 dark:text-white';
+    const tw =
+      'w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 hover:bg-blue-500 focus:ring-2 focus:ring-blue-300 dark:bg-gray-800 dark:text-white';
     const text = `<section className="${tw}">content</section>`;
-    const hints = extractHints(text);
+    const hints = extractHints(text, { showSameLine: true });
     expect(hints).toHaveLength(1);
     expect(hints[0].value).toBe(tw);
   });
 
   it('handles Tailwind with arbitrary values in brackets', () => {
-    const tw = 'grid grid-cols-[1fr_2fr_1fr] gap-[calc(1rem+4px)] bg-[#1a1a2e] text-[length:var(--size)]';
+    const tw =
+      'grid grid-cols-[1fr_2fr_1fr] gap-[calc(1rem+4px)] bg-[#1a1a2e] text-[length:var(--size)]';
     const text = `<div className="${tw}">content</div>`;
-    const hints = extractHints(text);
+    const hints = extractHints(text, { showSameLine: true });
     expect(hints).toHaveLength(1);
     expect(hints[0].value).toBe(tw);
   });
@@ -42,15 +46,16 @@ describe('Tailwind CSS class names', () => {
       isActive && 'bg-blue-500 text-white',
       isDisabled && 'opacity-50 cursor-not-allowed'
     )}>content</div>`;
-    const hints = extractHints(text);
+    const hints = extractHints(text, { showSameLine: true });
     expect(hints).toHaveLength(1);
     expect(hints[0].value).toContain('cn(');
     expect(hints[0].value).toContain('flex items-center');
   });
 
   it('handles Tailwind in a template literal with interpolation', () => {
-    const text = '<div className={`flex items-center ${isActive ? "bg-blue-500" : "bg-gray-200"} rounded-lg p-4`}>content</div>';
-    const hints = extractHints(text);
+    const text =
+      '<div className={`flex items-center ${isActive ? "bg-blue-500" : "bg-gray-200"} rounded-lg p-4`}>content</div>';
+    const hints = extractHints(text, { showSameLine: true });
     expect(hints).toHaveLength(1);
     expect(hints[0].value).toContain('flex items-center');
     expect(hints[0].value).toContain('rounded-lg p-4');
@@ -64,12 +69,18 @@ describe('Tailwind CSS class names', () => {
     </ul>
   </nav>
 </div>`;
-    const hints = extractHints(text);
+    const hints = extractHints(text, { showSameLine: true });
     expect(hints).toHaveLength(4);
     expect(hints[0].value).toBe('hover:text-slate-900 transition-colors');
-    expect(hints[1].value).toBe('flex items-center gap-6 text-sm font-medium text-slate-600');
-    expect(hints[2].value).toBe('sticky top-0 z-50 flex items-center justify-between border-b bg-white/80 px-6 py-3 backdrop-blur-sm');
-    expect(hints[3].value).toBe('min-h-screen bg-gradient-to-br from-slate-50 to-slate-100');
+    expect(hints[1].value).toBe(
+      'flex items-center gap-6 text-sm font-medium text-slate-600',
+    );
+    expect(hints[2].value).toBe(
+      'sticky top-0 z-50 flex items-center justify-between border-b bg-white/80 px-6 py-3 backdrop-blur-sm',
+    );
+    expect(hints[3].value).toBe(
+      'min-h-screen bg-gradient-to-br from-slate-50 to-slate-100',
+    );
   });
 
   it('handles multiline className attribute with Tailwind', () => {

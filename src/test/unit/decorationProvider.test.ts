@@ -1,23 +1,26 @@
-import { describe, it, expect, vi } from 'vitest';
-import { Position, window } from './__mocks__/vscode.js';
+import { describe, expect, it, vi } from 'vitest';
 import {
   buildDecorations,
-  createDecorationType,
   clearDecorations,
+  createDecorationType,
 } from '../../decorationProvider.js';
-import type { HintData, ClassNamePreviewConfig } from '../../types.js';
+import type { ClassLensConfig, HintData } from '../../types.js';
+import { Position, window } from './__mocks__/vscode.js';
 
 const makeConfig = (
-  overrides: Partial<ClassNamePreviewConfig> = {},
-): ClassNamePreviewConfig => ({
+  overrides: Partial<ClassLensConfig> = {},
+): ClassLensConfig => ({
   enabled: true,
   renderMode: 'decoration',
   maxLength: 0,
   truncateType: 'character',
   truncatePosition: 'end',
-  fontStyle: 'italic',
   opacity: '0.9',
   prefix: '// ',
+  suffix: '',
+  ellipsis: '...',
+  showSameLine: false,
+  hideSelfClosing: false,
   excludedLanguages: [],
   transformPatterns: [],
   ...overrides,
@@ -35,6 +38,7 @@ describe('decorationProvider', () => {
         {
           value: 'container',
           closingTagEnd: { line: 2, character: 5 },
+          openingTagEndLine: 0,
           tagName: 'div',
         },
       ];
@@ -53,6 +57,7 @@ describe('decorationProvider', () => {
         {
           value: 'foo bar',
           closingTagEnd: { line: 0, character: 10 },
+          openingTagEndLine: 0,
           tagName: 'div',
         },
       ];
@@ -67,6 +72,7 @@ describe('decorationProvider', () => {
         {
           value: 'test',
           closingTagEnd: { line: 0, character: 5 },
+          openingTagEndLine: 0,
           tagName: 'div',
         },
       ];
@@ -76,21 +82,73 @@ describe('decorationProvider', () => {
       expect(result[0].renderOptions?.after?.contentText).toBe('/* test');
     });
 
-    it('applies fontStyle from config', () => {
+    it('appends suffix when set', () => {
       const hints: HintData[] = [
         {
-          value: 'test',
+          value: 'foo bar',
           closingTagEnd: { line: 0, character: 5 },
+          openingTagEndLine: 0,
           tagName: 'div',
         },
       ];
 
       const result = buildDecorations(
         hints,
-        makeConfig({ fontStyle: 'normal' }),
+        makeConfig({ prefix: '/*', suffix: '*/' }),
       );
 
-      expect(result[0].renderOptions?.after?.fontStyle).toBe('normal');
+      expect(result[0].renderOptions?.after?.contentText).toBe('/* foo bar */');
+    });
+
+    it('inserts a single space even when prefix already has a trailing space', () => {
+      const hints: HintData[] = [
+        {
+          value: 'foo bar',
+          closingTagEnd: { line: 0, character: 5 },
+          openingTagEndLine: 0,
+          tagName: 'div',
+        },
+      ];
+
+      const result = buildDecorations(
+        hints,
+        makeConfig({ prefix: '// ', suffix: '' }),
+      );
+
+      expect(result[0].renderOptions?.after?.contentText).toBe('// foo bar');
+    });
+
+    it('drops empty prefix and suffix from the join', () => {
+      const hints: HintData[] = [
+        {
+          value: 'foo bar',
+          closingTagEnd: { line: 0, character: 5 },
+          openingTagEndLine: 0,
+          tagName: 'div',
+        },
+      ];
+
+      const result = buildDecorations(
+        hints,
+        makeConfig({ prefix: '', suffix: '' }),
+      );
+
+      expect(result[0].renderOptions?.after?.contentText).toBe('foo bar');
+    });
+
+    it('applies italic fontStyle to every decoration', () => {
+      const hints: HintData[] = [
+        {
+          value: 'test',
+          closingTagEnd: { line: 0, character: 5 },
+          openingTagEndLine: 0,
+          tagName: 'div',
+        },
+      ];
+
+      const result = buildDecorations(hints, makeConfig());
+
+      expect(result[0].renderOptions?.after?.fontStyle).toBe('italic');
     });
 
     it('applies opacity from config', () => {
@@ -98,6 +156,7 @@ describe('decorationProvider', () => {
         {
           value: 'test',
           closingTagEnd: { line: 0, character: 5 },
+          openingTagEndLine: 0,
           tagName: 'div',
         },
       ];
@@ -112,16 +171,19 @@ describe('decorationProvider', () => {
         {
           value: 'first',
           closingTagEnd: { line: 1, character: 5 },
+          openingTagEndLine: 0,
           tagName: 'div',
         },
         {
           value: 'second',
           closingTagEnd: { line: 3, character: 10 },
+          openingTagEndLine: 2,
           tagName: 'span',
         },
         {
           value: 'third',
           closingTagEnd: { line: 7, character: 2 },
+          openingTagEndLine: 5,
           tagName: 'p',
         },
       ];
@@ -139,6 +201,7 @@ describe('decorationProvider', () => {
         {
           value: 'test',
           closingTagEnd: { line: 4, character: 8 },
+          openingTagEndLine: 2,
           tagName: 'div',
         },
       ];
@@ -156,20 +219,20 @@ describe('decorationProvider', () => {
       (
         window.createTextEditorDecorationType as ReturnType<typeof vi.fn>
       ).mockClear();
-      createDecorationType(makeConfig());
+      createDecorationType();
       expect(window.createTextEditorDecorationType).toHaveBeenCalledOnce();
     });
 
-    it('passes fontStyle from config', () => {
+    it('always creates the decoration type with italic fontStyle', () => {
       (
         window.createTextEditorDecorationType as ReturnType<typeof vi.fn>
       ).mockClear();
-      createDecorationType(makeConfig({ fontStyle: 'normal' }));
+      createDecorationType();
 
       const arg = (
         window.createTextEditorDecorationType as ReturnType<typeof vi.fn>
       ).mock.calls[0][0];
-      expect(arg.after.fontStyle).toBe('normal');
+      expect(arg.after.fontStyle).toBe('italic');
     });
   });
 

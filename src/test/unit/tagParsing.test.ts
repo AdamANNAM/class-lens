@@ -40,7 +40,7 @@ describe('findOpeningTagsWithClass', () => {
     expect(result[0].classValue).toBe('foo ${bar}');
   });
 
-  it('excludes self-closing tags', () => {
+  it('flags self-closing tags via selfClosing=true', () => {
     const text = '<img className="hero" />';
     const result = findOpeningTagsWithClass(text);
     expect(result).toHaveLength(1);
@@ -82,7 +82,8 @@ describe('findOpeningTagsWithClass', () => {
   });
 
   it('finds multiple tags', () => {
-    const text = '<div className="a">hello</div><span className="b">world</span>';
+    const text =
+      '<div className="a">hello</div><span className="b">world</span>';
     const result = findOpeningTagsWithClass(text);
     expect(result).toHaveLength(2);
     expect(result[0].classValue).toBe('a');
@@ -96,7 +97,8 @@ describe('findOpeningTagsWithClass', () => {
   });
 
   it('handles ternary in JSX expression', () => {
-    const text = "<div className={isActive ? 'active' : 'inactive'}>hello</div>";
+    const text =
+      "<div className={isActive ? 'active' : 'inactive'}>hello</div>";
     const result = findOpeningTagsWithClass(text);
     expect(result).toHaveLength(1);
     expect(result[0].classValue).toBe("isActive ? 'active' : 'inactive'");
@@ -129,7 +131,8 @@ describe('matchClosingTags', () => {
   });
 
   it('matches nested same-name tags correctly', () => {
-    const text = '<div className="outer"><div className="inner">hello</div></div>';
+    const text =
+      '<div className="outer"><div className="inner">hello</div></div>';
     const openingTags = findOpeningTagsWithClass(text);
     const hints = matchClosingTags(text, openingTags);
     expect(hints).toHaveLength(2);
@@ -186,14 +189,17 @@ describe('buildTagMatchRegex', () => {
     ['div', '<span>', undefined, 'non-matching tag'],
     ['Motion.div', '<Motion.div className="a">', 1, 'dotted opening'],
     ['Motion.div', '</Motion.div>', 3, 'dotted closing'],
-  ])('tagName=%s input=%s → group %s (%s)', (tagName, input, expectedGroup, _label) => {
-    const re = buildTagMatchRegex(tagName);
-    const match = re.exec(input);
-    if (expectedGroup === undefined) {
-      expect(match).toBeNull();
-    } else {
-      expect(match).not.toBeNull();
-      expect(match![expectedGroup]).toBe(tagName);
-    }
-  });
+  ])(
+    'tagName=%s input=%s → group %s (%s)',
+    (tagName, input, expectedGroup, _label) => {
+      const re = buildTagMatchRegex(tagName);
+      const match = re.exec(input);
+      if (expectedGroup === undefined) {
+        expect(match).toBeNull();
+      } else {
+        expect(match).not.toBeNull();
+        expect(match![expectedGroup]).toBe(tagName);
+      }
+    },
+  );
 });

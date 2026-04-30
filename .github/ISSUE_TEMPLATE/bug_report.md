@@ -1,9 +1,9 @@
 ---
 name: Bug report
 about: Report a bug with Class Lens
-title: ""
+title: ''
 labels: bug
-assignees: ""
+assignees: ''
 ---
 
 **Describe the bug**

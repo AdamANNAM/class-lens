@@ -7,9 +7,7 @@ export function ExpressionsComponent({ isActive }: { isActive: boolean }) {
       <span className={`text ${isActive ? 'active' : ''}`}>
         Template literal
       </span>
-      <p className={isActive ? 'visible' : 'hidden'}>
-        Ternary
-      </p>
+      <p className={isActive ? 'visible' : 'hidden'}>Ternary</p>
       <section className={cn('base', { highlight: isActive })}>
         Function call
       </section>

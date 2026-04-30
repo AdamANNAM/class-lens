@@ -5,40 +5,25 @@ import { vi } from 'vitest';
 export class Position {
   constructor(
     public readonly line: number,
-    public readonly character: number
+    public readonly character: number,
   ) {}
 }
 
 export class Range {
-  public readonly start: Position;
-  public readonly end: Position;
-
-  constructor(startOrStartLine: Position | number, endOrStartChar: Position | number, endLine?: number, endChar?: number) {
-    if (startOrStartLine instanceof Position && endOrStartChar instanceof Position) {
-      this.start = startOrStartLine;
-      this.end = endOrStartChar;
-    } else {
-      this.start = new Position(startOrStartLine as number, endOrStartChar as number);
-      this.end = new Position(endLine ?? 0, endChar ?? 0);
-    }
-  }
+  constructor(
+    public readonly start: Position,
+    public readonly end: Position,
+  ) {}
 }
 
 // --- InlayHint ---
 
-export enum InlayHintKind {
-  Type = 1,
-  Parameter = 2,
-}
-
 export class InlayHint {
   paddingLeft?: boolean;
-  paddingRight?: boolean;
 
   constructor(
     public position: Position,
     public label: string,
-    public kind?: InlayHintKind
   ) {}
 }
 
@@ -64,35 +49,34 @@ export class EventEmitter<T> {
 
   event = (listener: (e: T) => void) => {
     this.listeners.push(listener);
-    return { dispose: () => { this.listeners = this.listeners.filter((l) => l !== listener); } };
+    return {
+      dispose: () => {
+        this.listeners = this.listeners.filter((l) => l !== listener);
+      },
+    };
   };
 
-  fire(data: T): void {
+  fire(data: T) {
     this.listeners.forEach((l) => l(data));
   }
 
-  dispose(): void {
+  dispose() {
     this.listeners = [];
   }
-}
-
-// --- ConfigurationTarget ---
-
-export enum ConfigurationTarget {
-  Global = 1,
-  Workspace = 2,
-  WorkspaceFolder = 3,
 }
 
 // --- workspace.getConfiguration mock ---
 
 const configStore: Record<string, Record<string, unknown>> = {};
 
-export function _setMockConfig(section: string, values: Record<string, unknown>): void {
-  configStore[section] = { ...values };
+export function _setMockConfig(
+  section: string,
+  values: Record<string, unknown>,
+) {
+  configStore[section] = { ...(configStore[section] ?? {}), ...values };
 }
 
-export function _clearMockConfig(): void {
+export function _clearMockConfig() {
   for (const key of Object.keys(configStore)) {
     delete configStore[key];
   }
@@ -108,7 +92,6 @@ export const workspace = {
         }
         return defaultValue;
       }),
-      update: vi.fn(),
     };
   }),
 };
@@ -117,12 +100,10 @@ export const workspace = {
 
 const mockDecorationType = {
   dispose: vi.fn(),
-  key: 'mock-decoration-type',
 };
 
 export const window = {
   createTextEditorDecorationType: vi.fn(() => mockDecorationType),
-  activeTextEditor: undefined as unknown,
 };
 
 // --- languages mock ---

@@ -1,50 +1,68 @@
 import type { TransformPattern } from './types.js';
 
 /**
- * Truncate a value to maxLength, adding '...' if truncated.
+ * Truncate a hint to maxLength, appending the configured ellipsis if truncated.
  * If maxLength is 0, no truncation is performed.
  *
  * @param type - 'character' cuts at exact char count, 'word' breaks at word boundary
  * @param position - 'end' keeps the start, 'start' keeps the end
+ * @param ellipsis - marker inserted at the truncated edge (default '...')
  */
-export const truncateValue = (
-  value: string,
+export const truncateHint = (
+  hint: string,
   maxLength: number,
   type: 'character' | 'word' = 'character',
-  position: 'end' | 'start' = 'end'
+  position: 'end' | 'start' = 'end',
+  ellipsis: string = '...',
 ) => {
-  if (maxLength === 0 || value.length <= maxLength) {
-    return value;
+  if (maxLength === 0 || hint.length <= maxLength) {
+    return hint;
   }
 
+  // Don't truncate if adding the ellipsis would make the result no shorter than the original
+  if (hint.length <= maxLength + ellipsis.length) {
+    return hint;
+  }
+
+  if (type === 'character' && position === 'end') {
+    return hint.slice(0, maxLength) + ellipsis;
+  }
   if (type === 'character') {
-    if (position === 'end') {
-      return value.slice(0, maxLength) + '...';
-    }
-    return '...' + value.slice(-maxLength);
+    return ellipsis + hint.slice(-maxLength);
   }
 
   // type === 'word'
-  const words = value.split(' ');
+  const words = hint.split(' ');
+  const ordered = position === 'end' ? words : [...words].reverse();
+  const count = wordsThatFit(ordered, maxLength);
 
-  if (position === 'end') {
-    let result = '';
-    for (const word of words) {
-      const candidate = result === '' ? word : result + ' ' + word;
-      if (candidate.length > maxLength) break;
-      result = candidate;
-    }
-    return result === '' ? value.slice(0, maxLength) + '...' : result + '...';
+  // When only 1 word would be dropped, just keep it (if within 25% of maxLength)
+  if (
+    count === words.length - 1 &&
+    hint.length <= Math.floor(maxLength * 1.25)
+  ) {
+    return hint;
   }
 
-  // position === 'start'
-  let result = '';
-  for (let i = words.length - 1; i >= 0; i--) {
-    const candidate = result === '' ? words[i] : words[i] + ' ' + result;
-    if (candidate.length > maxLength) break;
-    result = candidate;
+  if (count === 0) {
+    return position === 'end'
+      ? hint.slice(0, maxLength) + ellipsis
+      : ellipsis + hint.slice(-maxLength);
   }
-  return result === '' ? '...' + value.slice(-maxLength) : '...' + result;
+
+  return position === 'end'
+    ? words.slice(0, count).join(' ') + ellipsis
+    : ellipsis + words.slice(-count).join(' ');
+};
+
+/** Returns how many leading words fit within maxLength when joined by spaces. */
+const wordsThatFit = (words: string[], maxLength: number) => {
+  let length = 0;
+  for (let i = 0; i < words.length; i++) {
+    length += (i > 0 ? 1 : 0) + words[i].length;
+    if (length > maxLength) return i;
+  }
+  return words.length;
 };
 
 /**
@@ -52,7 +70,10 @@ export const truncateValue = (
  * Each pattern is applied in sequence; invalid regexes are silently skipped.
  * The final result is trimmed.
  */
-export const applyTransforms = (value: string, patterns: TransformPattern[]) => {
+export const applyTransforms = (
+  value: string,
+  patterns: TransformPattern[],
+) => {
   let result = value;
   for (const { pattern, replacement, flags } of patterns) {
     try {
@@ -64,3 +85,10 @@ export const applyTransforms = (value: string, patterns: TransformPattern[]) => 
   }
   return result.trim();
 };
+
+/**
+ * Collapse runs of whitespace (spaces, tabs, newlines) into a single space
+ * and trim. Used so multiline className expressions render as one tidy line.
+ */
+export const normalizeWhitespace = (value: string) =>
+  value.replace(/\s+/g, ' ').trim();

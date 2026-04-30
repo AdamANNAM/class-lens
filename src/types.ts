@@ -8,6 +8,8 @@ export interface HintData {
   value: string;
   /** Position of the closing tag's '>' character */
   closingTagEnd: Position;
+  /** Line of the opening tag's '>' character */
+  openingTagEndLine: number;
   /** The tag name (e.g. 'div', 'MyComponent') */
   tagName: string;
 }
@@ -29,15 +31,28 @@ export interface TransformPattern {
   flags: string;
 }
 
-export interface ClassNamePreviewConfig {
+export interface ClassLensConfig {
   enabled: boolean;
   renderMode: 'decoration' | 'inlayHint';
   maxLength: number;
   truncateType: 'character' | 'word';
   truncatePosition: 'end' | 'start';
-  fontStyle: 'italic' | 'normal';
   opacity: string;
   prefix: string;
+  suffix: string;
+  ellipsis: string;
+  showSameLine: boolean;
+  hideSelfClosing: boolean;
   excludedLanguages: string[];
   transformPatterns: TransformPattern[];
+}
+
+export interface ExtractHintsOptions {
+  maxLength?: number;
+  truncateType?: 'character' | 'word';
+  truncatePosition?: 'end' | 'start';
+  ellipsis?: string;
+  transformPatterns?: TransformPattern[];
+  showSameLine?: boolean;
+  hideSelfClosing?: boolean;
 }

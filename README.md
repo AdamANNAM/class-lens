@@ -1,6 +1,6 @@
 # Class Lens
 
-See your `className` and `class` values at a glance. Class Lens displays inline annotations next to closing tags, so you always know which CSS classes an element uses without scrolling back to the opening tag.
+Identify closing tags by their `className` at a glance. Class Lens shows the `className` or `class` value as an inline preview next to every closing tag, so you never lose track of which `</div>` belongs to which element.
 
 ![Class Lens in action](images/screenshot.png)
 
@@ -18,10 +18,8 @@ code --install-extension Homuzu.class-lens
 
 ```jsx
 <div className="flex items-center gap-4">
-  <span className="text-lg font-bold">
-    Hello World
-  </span>                                        // text-lg font-bold
-</div>                                           // flex items-center gap-4
+  <span className="text-lg font-bold">Hello World</span> // text-lg font-bold
+</div> // flex items-center gap-4
 ```
 
 When your JSX, HTML, or template markup gets deeply nested, matching a `</div>` to its opening tag means scrolling up and hunting for the right line. Class Lens solves this by showing the `className` or `class` value as a faded annotation right after each closing tag.
@@ -36,39 +34,42 @@ When your JSX, HTML, or template markup gets deeply nested, matching a `</div>` 
 
 ## Supported Patterns
 
-| Code | Annotation |
-|------|------------|
-| `className="flex gap-4"` | `flex gap-4` |
-| `class="container mx-auto"` | `container mx-auto` |
-| `className={styles.wrapper}` | `wrapper` |
-| `` className={`text-${color}`} `` | `` text-${color} `` |
-| `className={active ? 'on' : 'off'}` | `active ? 'on' : 'off'` |
-| `className={cn('base', { bold: x })}` | `'base', { bold: x }` |
+| Code                                  | Annotation              |
+| ------------------------------------- | ----------------------- |
+| `className="flex gap-4"`              | `flex gap-4`            |
+| `class="container mx-auto"`           | `container mx-auto`     |
+| `className={styles.wrapper}`          | `wrapper`               |
+| ``className={`text-${color}`}``       | `text-${color}`         |
+| `className={active ? 'on' : 'off'}`   | `active ? 'on' : 'off'` |
+| `className={cn('base', { bold: x })}` | `'base', { bold: x }`   |
 
-Self-closing tags (`<img />`, `<br />`, `<input />`) are ignored since they have no closing tag.
+Self-closing tags (`<img />`, `<br />`, `<input />`) are also annotated, but only when the `<` and `/>` are on different lines (so a one-line `<img className="..." />` stays quiet by default). Set `classLens.hideSelfClosing` to `true` to skip them entirely.
 
 ## Settings
 
-All settings are under `classnamePreview.*` in VS Code settings.
+All settings are under `classLens.*` in VS Code settings.
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `enabled` | `true` | Enable or disable annotations |
-| `renderMode` | `"decoration"` | `"decoration"` for text decorations, `"inlayHint"` for native inlay hints |
-| `maxLength` | `50` | Truncate long values (0 = no limit) |
-| `truncateType` | `"word"` | `"character"` for exact count, `"word"` for word boundary |
-| `truncatePosition` | `"end"` | `"end"` keeps the start, `"start"` keeps the end |
-| `fontStyle` | `"italic"` | `"italic"` or `"normal"` |
-| `opacity` | `"0.9"` | Opacity of the annotation text |
-| `prefix` | `"// "` | Text before the class value |
-| `excludedLanguages` | `[]` | Language IDs to exclude (e.g. `["markdown", "json"]`) |
-| `transformPatterns` | `[...]` | Regex transforms applied to values before display (strips `styles.` prefixes, unwraps `cn()`/`clsx()`/`cx()`/`classNames()` calls, etc.) |
+| Setting             | Default        | Description                                                                                                                              |
+| ------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `enabled`           | `true`         | Enable or disable annotations                                                                                                            |
+| `renderMode`        | `"decoration"` | `"decoration"` for text decorations, `"inlayHint"` for native inlay hints                                                                |
+| `maxLength`         | `40`           | Truncate long values (0 = no limit)                                                                                                      |
+| `truncateType`      | `"word"`       | `"character"` for exact count, `"word"` for word boundary                                                                                |
+| `truncatePosition`  | `"end"`        | `"end"` keeps the start, `"start"` keeps the end                                                                                         |
+| `opacity`           | `"0.9"`        | Opacity of the annotation text                                                                                                           |
+| `prefix`            | `"/*"`         | Text before the class value (a space between prefix and value is inserted automatically)                                                 |
+| `suffix`            | `"*/"`         | Text after the class value (a space between value and suffix is inserted automatically; pair with `prefix` for block-comment style)      |
+| `ellipsis`          | `"..."`        | Marker shown when a value is truncated (e.g. `"…"`, or `""` to disable)                                                                  |
+| `showSameLine`      | `false`        | Show annotations on tags whose opening `<` and closing `>` are on the same line (off by default to avoid noise on one-line elements)     |
+| `hideSelfClosing`   | `false`        | Skip annotations on self-closing tags (`<input />`, `<img />`, etc.)                                                                     |
+| `excludedLanguages` | `[]`           | Language IDs to exclude (e.g. `["markdown", "json"]`)                                                                                    |
+| `transformPatterns` | `[...]`        | Regex transforms applied to values before display (strips `styles.` prefixes, unwraps `cn()`/`clsx()`/`cx()`/`classNames()` calls, etc.) |
 
 ## Render Modes
 
 **Text Decorations** (default) — appends faded text after the closing tag, styled like a comment. Works in any theme.
 
-**Inlay Hints** — uses VS Code's native inlay hint API. Respects your editor's inlay hint settings and theme colors. Toggle with `"classnamePreview.renderMode": "inlayHint"`.
+**Inlay Hints** — uses VS Code's native inlay hint API. Respects your editor's inlay hint settings and theme colors. Toggle with `"classLens.renderMode": "inlayHint"`.
 
 ## FAQ
 
@@ -81,8 +82,8 @@ No. The parser is a lightweight regex pass over the document text with a 200ms d
 **Can I use it with a language not listed?**
 Yes. Class Lens runs on all languages by default. If it finds `className=` or `class=` in any file, it shows annotations. Use `excludedLanguages` to turn it off for specific languages.
 
-**Why don't I see annotations on `<img />` or `<br />`?**
-Self-closing tags have no closing tag to annotate, so they're skipped.
+**Why don't I see annotations on a single-line `<img className="..." />`?**
+Self-closing tags follow the same `showSameLine` rule as paired tags: hidden when the `<` and `/>` are on the same line, shown when the tag spans multiple lines. Flip `classLens.showSameLine` to `true` to see them on single-line tags too, or set `classLens.hideSelfClosing` to `true` to skip self-closing tags entirely.
 
 ## Known Issues
 

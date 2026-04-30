@@ -1,7 +1,7 @@
 {
   "name": "class-lens",
-  "displayName": "Class Lens — className & CSS Class Annotations",
-  "description": "See className and CSS class values as inline annotations next to closing tags in languages such as JSX, TSX, HTML, Vue, Svelte, Astro, and more",
+  "displayName": "Class Lens — Inline className & class Preview",
+  "description": "Identify closing tags by their className and class values. Inline preview for JSX, TSX, HTML, Vue, Svelte, Astro, React, and Tailwind.",
   "version": "0.1.0",
   "publisher": "Homuzu",
   "license": "MIT",
@@ -23,15 +23,21 @@
   ],
   "keywords": [
     "className",
+    "closing tag",
     "CSS",
     "class",
-    "closing tag",
-    "React",
-    "JSX",
-    "Tailwind",
     "annotation",
-    "inlay hint",
-    "preview"
+    "preview",
+    "inline",
+    "JSX",
+    "TSX",
+    "HTML",
+    "Tailwind",
+    "React",
+    "Vue",
+    "Svelte",
+    "Astro",
+    "inlay hint"
   ],
   "galleryBanner": {
     "color": "#1e1e2e",
@@ -45,12 +51,12 @@
     "configuration": {
       "title": "Class Lens",
       "properties": {
-        "classnamePreview.enabled": {
+        "classLens.enabled": {
           "type": "boolean",
           "default": true,
           "description": "Enable/disable className preview annotations"
         },
-        "classnamePreview.renderMode": {
+        "classLens.renderMode": {
           "type": "string",
           "default": "decoration",
           "enum": [
@@ -63,12 +69,12 @@
           ],
           "description": "Rendering mode for className previews"
         },
-        "classnamePreview.maxLength": {
+        "classLens.maxLength": {
           "type": "number",
-          "default": 50,
+          "default": 40,
           "description": "Maximum characters to display (0 = no truncation)"
         },
-        "classnamePreview.truncateType": {
+        "classLens.truncateType": {
           "type": "string",
           "default": "word",
           "enum": [
@@ -81,7 +87,7 @@
           ],
           "description": "Truncate at exact character count or at word boundary"
         },
-        "classnamePreview.truncatePosition": {
+        "classLens.truncatePosition": {
           "type": "string",
           "default": "end",
           "enum": [
@@ -94,26 +100,37 @@
           ],
           "description": "Truncate from the end (keep start) or from the start (keep end)"
         },
-        "classnamePreview.fontStyle": {
-          "type": "string",
-          "default": "italic",
-          "enum": [
-            "italic",
-            "normal"
-          ],
-          "description": "Font style for annotations"
-        },
-        "classnamePreview.opacity": {
+        "classLens.opacity": {
           "type": "string",
           "default": "0.9",
           "description": "CSS opacity for annotations"
         },
-        "classnamePreview.prefix": {
+        "classLens.prefix": {
           "type": "string",
-          "default": "// ",
-          "description": "Prefix before the class value (e.g. '// ' to look like a comment)"
+          "default": "/*",
+          "description": "Prefix before the class value (e.g. '/*' to pair with a '*/' suffix for block-comment style). A space between prefix and value is inserted automatically."
         },
-        "classnamePreview.excludedLanguages": {
+        "classLens.suffix": {
+          "type": "string",
+          "default": "*/",
+          "description": "Suffix after the class value. A space between value and suffix is inserted automatically."
+        },
+        "classLens.ellipsis": {
+          "type": "string",
+          "default": "...",
+          "description": "Marker shown when a class value is truncated (appended for truncatePosition='end', prepended for 'start'; set to '' to disable)."
+        },
+        "classLens.showSameLine": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show the className preview comment when a tag's opening and closing are on the same line."
+        },
+        "classLens.hideSelfClosing": {
+          "type": "boolean",
+          "default": false,
+          "description": "Hide className previews on self-closing tags (e.g. <input />, <img />). When false (default), self-closing tags are annotated like any other tag, subject to showSameLine. When true, self-closing tags get no annotation."
+        },
+        "classLens.excludedLanguages": {
           "type": "array",
           "default": [],
           "items": {
@@ -121,16 +138,44 @@
           },
           "description": "Language IDs where the extension should NOT show annotations"
         },
-        "classnamePreview.transformPatterns": {
+        "classLens.transformPatterns": {
           "type": "array",
           "default": [
-            { "pattern": "^classNames\\((.*)\\)$", "replacement": "$1", "flags": "s" },
-            { "pattern": "^clsx\\((.*)\\)$", "replacement": "$1", "flags": "s" },
-            { "pattern": "^cx\\((.*)\\)$", "replacement": "$1", "flags": "s" },
-            { "pattern": "^cn\\((.*)\\)$", "replacement": "$1", "flags": "s" },
-            { "pattern": "styles\\.", "replacement": "", "flags": "g" },
-            { "pattern": "\\$style\\.", "replacement": "", "flags": "g" },
-            { "pattern": "\\bclassName\\b\\s*,\\s*|,\\s*\\bclassName\\b|\\bclassName\\b", "replacement": "", "flags": "g" }
+            {
+              "pattern": "^classNames\\((.*)\\)$",
+              "replacement": "$1",
+              "flags": "s"
+            },
+            {
+              "pattern": "^clsx\\((.*)\\)$",
+              "replacement": "$1",
+              "flags": "s"
+            },
+            {
+              "pattern": "^cx\\((.*)\\)$",
+              "replacement": "$1",
+              "flags": "s"
+            },
+            {
+              "pattern": "^cn\\((.*)\\)$",
+              "replacement": "$1",
+              "flags": "s"
+            },
+            {
+              "pattern": "styles\\.",
+              "replacement": "",
+              "flags": "g"
+            },
+            {
+              "pattern": "\\$style\\.",
+              "replacement": "",
+              "flags": "g"
+            },
+            {
+              "pattern": "\\bclassName\\b\\s*,\\s*|,\\s*\\bclassName\\b|\\bclassName\\b",
+              "replacement": "",
+              "flags": "g"
+            }
           ],
           "items": {
             "type": "object",
@@ -170,6 +215,8 @@
     "pretest": "npm run compile",
     "test": "vscode-test",
     "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "format": "prettier --write .",
     "vsix": "npm run package && vsce package --no-dependencies",
     "vsix:install": "npm run vsix && code --install-extension class-lens-0.1.0.vsix"
   },
@@ -183,9 +230,12 @@
     "@vscode/vsce": "^3.9.1",
     "esbuild": "^0.28.0",
     "eslint": "^10.2.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
     "mocha": "^11.7.5",
+    "prettier": "^3.8.3",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.59.0",
+    "typescript-eslint": "^8.59.1",
     "vitest": "^4.1.5"
   }
 }

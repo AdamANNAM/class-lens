@@ -1,25 +1,34 @@
-import * as vscode from 'vscode';
-import { extractHints } from './parser.js';
+import {
+  Disposable,
+  ExtensionContext,
+  TextEditorDecorationType,
+  languages,
+  window,
+  workspace,
+} from 'vscode';
 import { getConfig, isLanguageSupported } from './configuration.js';
 import {
-  createDecorationType,
   applyDecorations,
   clearDecorations,
+  createDecorationType,
   disposeDecorationType,
 } from './decorationProvider.js';
 import { ClassNameInlayHintsProvider } from './inlayHintProvider.js';
+import { extractHints } from './parser.js';
 
-let decorationType: vscode.TextEditorDecorationType | undefined;
+const DEBOUNCE_MS = 200;
+
+let decorationType: TextEditorDecorationType | undefined;
 let inlayHintsProvider: ClassNameInlayHintsProvider | undefined;
-let inlayHintsDisposable: vscode.Disposable | undefined;
+let inlayHintsDisposable: Disposable | undefined;
 let debounceTimer: ReturnType<typeof globalThis.setTimeout> | undefined;
 
 const setupProviders = (
   renderMode: 'decoration' | 'inlayHint',
-  context: vscode.ExtensionContext
+  context: ExtensionContext,
 ) => {
   if (decorationType) {
-    const editor = vscode.window.activeTextEditor;
+    const editor = window.activeTextEditor;
     if (editor) {
       clearDecorations(editor, decorationType);
     }
@@ -37,22 +46,20 @@ const setupProviders = (
     inlayHintsProvider = undefined;
   }
 
-  const config = getConfig();
-
   if (renderMode === 'decoration') {
-    decorationType = createDecorationType(config);
+    decorationType = createDecorationType();
   } else {
     inlayHintsProvider = new ClassNameInlayHintsProvider();
-    inlayHintsDisposable = vscode.languages.registerInlayHintsProvider(
+    inlayHintsDisposable = languages.registerInlayHintsProvider(
       { scheme: 'file' },
-      inlayHintsProvider
+      inlayHintsProvider,
     );
     context.subscriptions.push(inlayHintsDisposable);
   }
 };
 
 const triggerUpdateForActiveEditor = () => {
-  const editor = vscode.window.activeTextEditor;
+  const editor = window.activeTextEditor;
   if (!editor) return;
 
   const config = getConfig();
@@ -66,7 +73,15 @@ const triggerUpdateForActiveEditor = () => {
 
   if (config.renderMode === 'decoration' && decorationType) {
     const text = editor.document.getText();
-    const hints = extractHints(text, config.maxLength, config.truncateType, config.truncatePosition, config.transformPatterns);
+    const hints = extractHints(text, {
+      maxLength: config.maxLength,
+      truncateType: config.truncateType,
+      truncatePosition: config.truncatePosition,
+      ellipsis: config.ellipsis,
+      transformPatterns: config.transformPatterns,
+      showSameLine: config.showSameLine,
+      hideSelfClosing: config.hideSelfClosing,
+    });
     applyDecorations(editor, hints, config, decorationType);
   }
 
@@ -76,52 +91,44 @@ const triggerUpdateForActiveEditor = () => {
 };
 
 const debounceUpdate = () => {
-  if (debounceTimer) {
-    clearTimeout(debounceTimer);
-  }
-  debounceTimer = setTimeout(() => {
-    triggerUpdateForActiveEditor();
-  }, 200);
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(triggerUpdateForActiveEditor, DEBOUNCE_MS);
 };
 
-export const activate = (context: vscode.ExtensionContext) => {
+export const activate = (context: ExtensionContext) => {
   const config = getConfig();
 
   setupProviders(config.renderMode, context);
   triggerUpdateForActiveEditor();
 
   context.subscriptions.push(
-    vscode.window.onDidChangeActiveTextEditor(() => {
+    window.onDidChangeActiveTextEditor(() => {
       triggerUpdateForActiveEditor();
-    })
+    }),
   );
 
   context.subscriptions.push(
-    vscode.workspace.onDidChangeTextDocument((event) => {
-      const editor = vscode.window.activeTextEditor;
+    workspace.onDidChangeTextDocument((event) => {
+      const editor = window.activeTextEditor;
       if (editor && event.document === editor.document) {
         debounceUpdate();
       }
-    })
+    }),
   );
 
   context.subscriptions.push(
-    vscode.workspace.onDidChangeConfiguration((event) => {
-      if (event.affectsConfiguration('classnamePreview')) {
+    workspace.onDidChangeConfiguration((event) => {
+      if (event.affectsConfiguration('classLens')) {
         const newConfig = getConfig();
         setupProviders(newConfig.renderMode, context);
         triggerUpdateForActiveEditor();
       }
-    })
+    }),
   );
 };
 
 export const deactivate = () => {
-  if (debounceTimer) {
-    clearTimeout(debounceTimer);
-  }
+  clearTimeout(debounceTimer);
   disposeDecorationType();
-  if (inlayHintsProvider) {
-    inlayHintsProvider.dispose();
-  }
+  inlayHintsProvider?.dispose();
 };
