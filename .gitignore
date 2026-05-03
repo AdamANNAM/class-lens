@@ -4,3 +4,8 @@ dist/
 *.vsix
 .env
 .DS_Store
+
+.vscode/*
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/tasks.json

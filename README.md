@@ -1,6 +1,15 @@
 # Class Lens
 
-Identify closing tags by their `className` at a glance. Class Lens shows the `className` or `class` value as an inline preview next to every closing tag, so you never lose track of which `</div>` belongs to which element.
+See the `className` or `class` value of every closing tag at a glance. Class Lens shows the value as an inline preview right next to each `</div>`, `</section>`, or self-closing tag — so you never lose track of which closing tag belongs to which element, no matter how deeply nested your markup gets.
+
+Works in HTML, JSX, TSX, Vue, Svelte, Astro, PHP, ERB, and any file that uses `class=` or `className=` attributes. Zero config.
+
+[![Version](https://vsmarketplacebadges.dev/version/Homuzu.class-lens.svg)](https://marketplace.visualstudio.com/items?itemName=Homuzu.class-lens)
+[![Installs](https://vsmarketplacebadges.dev/installs/Homuzu.class-lens.svg)](https://marketplace.visualstudio.com/items?itemName=Homuzu.class-lens)
+[![Rating](https://vsmarketplacebadges.dev/rating/Homuzu.class-lens.svg)](https://marketplace.visualstudio.com/items?itemName=Homuzu.class-lens)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+> Want to see it without installing? Open [`demo/screenshot-example.html`](demo/screenshot-example.html) in this repo with the extension enabled.
 
 ![Class Lens in action](images/screenshot.png)
 
@@ -14,23 +23,32 @@ Alternatively, install from the command line:
 code --install-extension Homuzu.class-lens
 ```
 
+## Quick Start
+
+1. Install the extension.
+2. Open any HTML, JSX, Vue, Svelte, or other markup file.
+3. Done — annotations appear automatically.
+
+No commands, no keybindings, no setup. Toggle off any time with `classLens.enabled: false`.
+
 ## What It Does
 
 ```jsx
 <div className="flex items-center gap-4">
-  <span className="text-lg font-bold">Hello World</span> // text-lg font-bold
-</div> // flex items-center gap-4
+  <span className="text-lg font-bold">Hello World</span> /* text-lg font-bold */
+</div> /* flex items-center gap-4 */
 ```
 
-When your JSX, HTML, or template markup gets deeply nested, matching a `</div>` to its opening tag means scrolling up and hunting for the right line. Class Lens solves this by showing the `className` or `class` value as a faded annotation right after each closing tag.
+When your HTML, JSX, or template markup gets deeply nested, matching a `</div>` to its opening tag means scrolling up and hunting for the right line. Class Lens solves this by showing the `className` or `class` value as a faded annotation right after each closing tag.
 
 ## Features
 
-- **Works everywhere** — JSX, TSX, HTML, Vue, Svelte, Astro, PHP templates, ERB, and any file that uses `className=` or `class=` attributes
-- **Two rendering modes** — text decorations (default, looks like a comment) or native VS Code inlay hints
-- **Handles dynamic values** — template literals, ternary expressions, function calls like `cn()` and `clsx()` are all displayed
-- **Zero config** — works out of the box, active on all languages by default
-- **Lightweight** — no AST parsing, no language server, just fast regex matching
+- **Framework-agnostic** — runs on any file containing `class=` or `className=`. HTML, JSX, TSX, Vue, Svelte, Astro, PHP, ERB, Blade, Twig, Handlebars, Liquid, and more.
+- **Zero config** — active on every language by default; opt out per language with `excludedLanguages`.
+- **Two rendering modes** — text decorations (default, looks like a comment) or native VS Code inlay hints.
+- **Handles dynamic values** — template literals, ternaries, `cn()`/`clsx()`/`cx()`/`classNames()` calls all unwrap correctly.
+- **Lightweight** — regex parser with 200ms debounce, no AST, no language server, no file I/O.
+- **Set and forget** — no commands or keybindings to learn.
 
 ## Supported Patterns
 
@@ -70,6 +88,12 @@ All settings are under `classLens.*` in VS Code settings.
 **Text Decorations** (default) — appends faded text after the closing tag, styled like a comment. Works in any theme.
 
 **Inlay Hints** — uses VS Code's native inlay hint API. Respects your editor's inlay hint settings and theme colors. Toggle with `"classLens.renderMode": "inlayHint"`.
+
+## How It Compares
+
+There are several extensions that help with HTML and JSX tag navigation — they tend to do one of three things: highlight the _matching opening tag_ when your cursor is on a closer, color-code tag pairs with rainbow brackets, or rename paired tags as you type.
+
+Class Lens does something different and complementary: it shows the `className`/`class` value itself, inline, so you can identify a closing tag without moving your cursor or matching colors by eye. Use it alongside any tag-highlighter you already have.
 
 ## FAQ
 
