@@ -284,12 +284,45 @@ describe('applyTransforms — classNames() unwrap', () => {
   });
 });
 
+// ─── applyTransforms — generic wrapper unwrap ───────────────────────
+
+describe('applyTransforms — generic wrapper unwrap', () => {
+  const patterns: TransformPattern[] = [
+    { pattern: '^[\\w$]+\\((.*)\\)$', replacement: '$1', flags: 's' },
+  ];
+
+  it.each([
+    ["classNames('a','b')", "'a','b'"],
+    ["clsx('a','b')", "'a','b'"],
+    ["cn('a','b')", "'a','b'"],
+    ["cx('a','b')", "'a','b'"],
+    ["clsName('a', 'b')", "'a', 'b'"],
+    ["myCustomCx('foo')", "'foo'"],
+    ['$cn(a)', 'a'],
+    ['_helper(x, y)', 'x, y'],
+    ['not-classNames(x)', 'not-classNames(x)'],
+    ['styles.foo', 'styles.foo'],
+    ['classNames()', ''],
+  ])('transforms %s → %s', (input, expected) => {
+    expect(applyTransforms(input, patterns)).toBe(expected);
+  });
+
+  it('handles multiline aliased wrapper with s flag', () => {
+    const input = "clsName(\n  'a',\n  'b'\n)";
+    expect(applyTransforms(input, patterns)).toBe("'a',\n  'b'");
+  });
+
+  it('preserves nested wrapper calls (single-pass unwrap)', () => {
+    expect(applyTransforms("cn(getCn('a'))", patterns)).toBe("getCn('a')");
+  });
+});
+
 // ─── applyTransforms — combined defaults ────────────────────────────
 
 describe('applyTransforms — combined default patterns', () => {
   const defaults: TransformPattern[] = [
     { pattern: 'styles\\.', replacement: '', flags: 'g' },
-    { pattern: '^classNames\\((.*)\\)$', replacement: '$1', flags: 's' },
+    { pattern: '^[\\w$]+\\((.*)\\)$', replacement: '$1', flags: 's' },
   ];
 
   it.each([
@@ -379,10 +412,7 @@ describe('applyTransforms — className variable removal', () => {
 
 describe('applyTransforms — full defaults', () => {
   const defaults: TransformPattern[] = [
-    { pattern: '^classNames\\((.*)\\)$', replacement: '$1', flags: 's' },
-    { pattern: '^clsx\\((.*)\\)$', replacement: '$1', flags: 's' },
-    { pattern: '^cx\\((.*)\\)$', replacement: '$1', flags: 's' },
-    { pattern: '^cn\\((.*)\\)$', replacement: '$1', flags: 's' },
+    { pattern: '^[\\w$]+\\((.*)\\)$', replacement: '$1', flags: 's' },
     { pattern: 'styles\\.', replacement: '', flags: 'g' },
     { pattern: '\\$style\\.', replacement: '', flags: 'g' },
     {
@@ -397,6 +427,7 @@ describe('applyTransforms — full defaults', () => {
     ["clsx('flex', 'mt-2')", "'flex', 'mt-2'"],
     ['cn(styles.base, isActive && styles.active)', 'base, isActive && active'],
     ["cx('a', 'b')", "'a', 'b'"],
+    ["clsName('a', 'b')", "'a', 'b'"],
     ['$style.container', 'container'],
     ['styles.wrapper', 'wrapper'],
     ['className', ''],

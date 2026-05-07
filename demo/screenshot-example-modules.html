@@ -1,0 +1,12 @@
+import styles from './card.module.css';
+
+export const Card = () => (
+  <div className={styles.card}>
+    <img src="cap.jpg" className={styles.cardImageTop} alt="Cap" />
+    <div className={styles.cardBody}>
+      <h5 className={styles.cardTitle}>Card title</h5>
+      <p className={styles.cardText}>Some quick example text.</p>
+      <a href="#" className={styles.button}> Go somewhere </a>
+    </div>
+  </div>
+);

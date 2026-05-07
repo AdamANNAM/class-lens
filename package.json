@@ -2,7 +2,7 @@
   "name": "class-lens",
   "displayName": "Class Lens — Inline className & class Preview",
   "description": "See the className or class value of every closing tag inline. Works in HTML, JSX, TSX, Vue, Svelte, Astro, PHP, ERB, and any template language — zero config. Plays nicely with Tailwind CSS and React.",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "publisher": "Homuzu",
   "license": "MIT",
   "repository": {
@@ -161,22 +161,7 @@
           "type": "array",
           "default": [
             {
-              "pattern": "^classNames\\((.*)\\)$",
-              "replacement": "$1",
-              "flags": "s"
-            },
-            {
-              "pattern": "^clsx\\((.*)\\)$",
-              "replacement": "$1",
-              "flags": "s"
-            },
-            {
-              "pattern": "^cx\\((.*)\\)$",
-              "replacement": "$1",
-              "flags": "s"
-            },
-            {
-              "pattern": "^cn\\((.*)\\)$",
+              "pattern": "^[\\w$]+\\((.*)\\)$",
               "replacement": "$1",
               "flags": "s"
             },
@@ -218,7 +203,7 @@
               "pattern"
             ]
           },
-          "markdownDescription": "Array of regex transform patterns applied to hint values before display. Each entry has `pattern` (regex string), `replacement` (default `\"\"`), and `flags` (default `\"g\"`). Transforms run in order.\n\nExample to strip `styles.` prefix and unwrap `classNames()`:\n```json\n[\n  { \"pattern\": \"styles\\\\.\", \"replacement\": \"\", \"flags\": \"g\" },\n  { \"pattern\": \"^classNames\\\\((.*)\\\\)$\", \"replacement\": \"$1\", \"flags\": \"s\" }\n]\n```"
+          "markdownDescription": "Array of regex transform patterns applied to hint values before display. Each entry has `pattern` (regex string), `replacement` (default `\"\"`), and `flags` (default `\"g\"`). Transforms run in order.\n\nThe default first pattern (`^[\\w$]+\\((.*)\\)$`) unwraps any wrapper-function call — `classNames(...)`, `clsx(...)`, `cn(...)`, or your own alias like `clsName(...)`.\n\nExample to strip `styles.` prefix and unwrap a custom alias:\n```json\n[\n  { \"pattern\": \"styles\\\\.\", \"replacement\": \"\", \"flags\": \"g\" },\n  { \"pattern\": \"^clsName\\\\((.*)\\\\)$\", \"replacement\": \"$1\", \"flags\": \"s\" }\n]\n```"
         }
       }
     }

@@ -4,10 +4,7 @@ import type { ClassLensConfig, TransformPattern } from './types.js';
 const SECTION = 'classLens';
 
 const DEFAULT_TRANSFORM_PATTERNS: TransformPattern[] = [
-  { pattern: '^classNames\\((.*)\\)$', replacement: '$1', flags: 's' },
-  { pattern: '^clsx\\((.*)\\)$', replacement: '$1', flags: 's' },
-  { pattern: '^cx\\((.*)\\)$', replacement: '$1', flags: 's' },
-  { pattern: '^cn\\((.*)\\)$', replacement: '$1', flags: 's' },
+  { pattern: '^[\\w$]+\\((.*)\\)$', replacement: '$1', flags: 's' },
   { pattern: 'styles\\.', replacement: '', flags: 'g' },
   { pattern: '\\$style\\.', replacement: '', flags: 'g' },
   {

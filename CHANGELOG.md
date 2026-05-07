@@ -1,6 +1,12 @@
 # Changelog
 
-## [0.1.0]
+## [0.1.2]
+
+### Changed
+
+- `transformPatterns` default now unwraps **any** wrapper-function call via a single generic pattern (`^[\w$]+\((.*)\)$`), replacing the four name-specific patterns for `classNames()`/`clsx()`/`cx()`/`cn()`. Aliased imports such as `import classNames as clsName from 'classnames'` (or any custom util) now unwrap correctly without extra configuration.
+
+## [0.1.1]
 
 ### Added
 

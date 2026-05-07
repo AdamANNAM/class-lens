@@ -9,9 +9,19 @@ Works in HTML, JSX, TSX, Vue, Svelte, Astro, PHP, ERB, and any file that uses `c
 [![Rating](https://vsmarketplacebadges.dev/rating/Homuzu.class-lens.svg)](https://marketplace.visualstudio.com/items?itemName=Homuzu.class-lens)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> Want to see it without installing? Open [`demo/screenshot-example.html`](demo/screenshot-example.html) in this repo with the extension enabled.
+> Want to see it without installing? Open any of the demos in [`demo/`](demo) — Bootstrap, Tailwind, and CSS Modules — with the extension enabled.
 
-![Class Lens in action](images/screenshot.png)
+### Bootstrap
+
+![Class Lens annotating Bootstrap classes](images/screenshot-bootstrap.png)
+
+### Tailwind
+
+![Class Lens annotating Tailwind classes](images/screenshot-tailwind.png)
+
+### CSS Modules
+
+![Class Lens annotating CSS Module identifiers](images/screenshot-modules.png)
 
 ## Installation
 
@@ -46,7 +56,7 @@ When your HTML, JSX, or template markup gets deeply nested, matching a `</div>` 
 - **Framework-agnostic** — runs on any file containing `class=` or `className=`. HTML, JSX, TSX, Vue, Svelte, Astro, PHP, ERB, Blade, Twig, Handlebars, Liquid, and more.
 - **Zero config** — active on every language by default; opt out per language with `excludedLanguages`.
 - **Two rendering modes** — text decorations (default, looks like a comment) or native VS Code inlay hints.
-- **Handles dynamic values** — template literals, ternaries, `cn()`/`clsx()`/`cx()`/`classNames()` calls all unwrap correctly.
+- **Handles dynamic values** — template literals, ternaries, and any wrapper-function call (`cn()`, `clsx()`, `classNames()`, or your own alias like `clsName()`) all unwrap correctly.
 - **Lightweight** — regex parser with 200ms debounce, no AST, no language server, no file I/O.
 - **Set and forget** — no commands or keybindings to learn.
 
@@ -81,7 +91,7 @@ All settings are under `classLens.*` in VS Code settings.
 | `showSameLine`      | `false`        | Show annotations on tags whose opening `<` and closing `>` are on the same line (off by default to avoid noise on one-line elements)     |
 | `hideSelfClosing`   | `false`        | Skip annotations on self-closing tags (`<input />`, `<img />`, etc.)                                                                     |
 | `excludedLanguages` | `[]`           | Language IDs to exclude (e.g. `["markdown", "json"]`)                                                                                    |
-| `transformPatterns` | `[...]`        | Regex transforms applied to values before display (strips `styles.` prefixes, unwraps `cn()`/`clsx()`/`cx()`/`classNames()` calls, etc.) |
+| `transformPatterns` | `[...]`        | Regex transforms applied to values before display (strips `styles.` prefixes, unwraps any wrapper-function call like `cn()`/`classNames()`/your own alias, etc.)                  |
 
 ## Render Modes
 

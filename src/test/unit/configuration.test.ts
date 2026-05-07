@@ -21,7 +21,7 @@ describe('configuration', () => {
       expect(config.ellipsis).toBe('...');
       expect(config.showSameLine).toBe(false);
       expect(config.excludedLanguages).toEqual([]);
-      expect(config.transformPatterns).toHaveLength(7);
+      expect(config.transformPatterns).toHaveLength(4);
     });
 
     it('reads showSameLine override from config', () => {
@@ -146,7 +146,7 @@ describe('configuration', () => {
 
     it('returns default patterns when not configured', () => {
       const config = getConfig();
-      expect(config.transformPatterns).toHaveLength(7);
+      expect(config.transformPatterns).toHaveLength(4);
     });
   });
 });
